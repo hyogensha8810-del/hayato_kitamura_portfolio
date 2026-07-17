@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HAYATO KITAMURA | グルメの"色気"フォトグラファー</title>
+<meta name="description" content="グルメの&quot;色気&quot;フォトグラファー HAYATO KITAMURA のポートフォリオ。高級スイーツ・グルメ撮影。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Noto+Serif+JP:wght@200;300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ヘッダー（全ページ共通） -->
+<header class="site-header">
+  <a href="index.html" class="site-logo">HAYATO KITAMURA<span class="logo-sub">グルメの"色気"フォトグラファー</span></a>
+  <nav class="site-nav">
+    <a href="index.html" class="active">Works</a>
+    <a href="about.html">About</a>
+    <a href="awards.html">Awards</a>
+    <a href="contact.html">Contact</a>
+    <a href="https://www.instagram.com/hayato_ichinose_1" target="_blank" rel="noopener" class="insta-link" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" width="22" height="22"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/></svg>
+    </a>
+  </nav>
+  <button class="nav-toggle" aria-label="menu"><span></span><span></span><span></span></button>
+</header>
+
+<!-- トップ：横長写真のスライドショー -->
+<section class="hero" id="hero">
+  <div class="hero-slides" id="heroSlides"></div>
+  <div class="hero-caption">
+    <p class="hero-lead">一皿の、艶を撮る。</p>
+    <p class="hero-sub">Gourmet &amp; Sweets Photography</p>
+  </div>
+  <div class="hero-scroll">SCROLL<span class="scroll-line"></span></div>
+</section>
+
+<!-- グリッドギャラリー（縦横バラバラの写真が並ぶ） -->
+<main class="gallery-wrap">
+  <div class="masonry" id="masonry"></div>
+</main>
+
+<!-- ライトボックス（写真クリックで拡大） -->
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" aria-label="閉じる">&times;</button>
+  <img src="" alt="" id="lightboxImg">
+</div>
+
+<!-- 常時表示のCONTACTボタン（全ページ共通） -->
+<a href="contact.html" class="contact-fab">CONTACT</a>
+
+<footer class="site-footer">
+  <a href="https://www.instagram.com/hayato_ichinose_1" target="_blank" rel="noopener" class="insta-link" aria-label="Instagram">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" width="26" height="26"><rect x="2.5" y="2.5" width="19" height="19" rx="5.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="17.6" cy="6.4" r="1.1" fill="currentColor" stroke="none"/></svg>
+  </a>
+  <p>&copy; 2026 HAYATO KITAMURA. All rights reserved.</p>
+</footer>
+
+<script src="photos.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
