@@ -1,0 +1,64 @@
+name: Optimize images
+
+# photos/ 以下に画像が追加・更新されると自動でウェブ用サイズに縮小・圧縮します。
+# hero=長辺2400px / gallery=長辺1800px / profile=1200px（超えた分だけ縮小、小さい写真はそのまま）
+# 縮小後の画像はこのワークフローが自動でコミットしてリポジトリに反映します。
+# ※ GITHUB_TOKEN によるコミットは新たなワークフローを起動しないため、無限ループにはなりません。
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'photos/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install ImageMagick
+        run: sudo apt-get update && sudo apt-get install -y imagemagick
+
+      - name: Resize & compress images
+        run: |
+          set -e
+          shopt -s nullglob nocaseglob
+
+          resize_one () {
+            local f="$1"; local max="$2"; local q="$3"
+            [ -e "$f" ] || return 0
+            local dims w h long
+            dims=$(identify -format "%w %h" "$f[0]" 2>/dev/null) || return 0
+            w=${dims% *}; h=${dims#* }
+            [ -z "$w" ] && return 0
+            long=$w; [ "$h" -gt "$w" ] && long=$h
+            if [ "$long" -gt "$max" ]; then
+              echo "Resizing $f (long=$long -> $max)"
+              mogrify -resize "${max}x${max}>" -quality "$q" -strip "$f"
+            else
+              echo "Skip $f (long=$long <= $max)"
+            fi
+          }
+
+          resize_dir () {
+            local dir="$1"; local max="$2"; local q="$3"
+            for f in "$dir"/*.jpg "$dir"/*.jpeg "$dir"/*.png; do
+              resize_one "$f" "$max" "$q"
+            done
+          }
+
+          resize_dir photos/hero 2400 82
+          resize_dir photos/gallery 1800 82
+          resize_one photos/profile.jpg 1200 85
+
+      - name: Commit optimized images
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: auto-optimize images [skip ci]"
+          file_pattern: 'photos/**'
