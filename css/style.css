@@ -276,10 +276,10 @@ a { color: inherit; text-decoration: none; }
 
 .profile-block {
   display: flex;
-  gap: 40px;
+  flex-direction: column;
+  gap: 16px;
   align-items: flex-start;
   margin-bottom: 40px;
-  flex-wrap: wrap;
 }
 .profile-photo {
   width: 240px;
