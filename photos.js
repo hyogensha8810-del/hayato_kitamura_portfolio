@@ -19,9 +19,9 @@ const SITE_PHOTOS = {
 
   /* --- トップのスライドショー（横長写真） --- */
   hero: [
-    { src: "photos/hero/hero-01.jpg", alt: "スイーツ写真" },
-    { src: "photos/hero/hero-02.jpg", alt: "グルメ写真" },
-    { src: "photos/hero/hero-03.jpg", alt: "スイーツ写真" },
+    { src: "photos/hero/_65A2451-1.jpg", alt: "スイーツ写真" },
+    { src: "photos/hero/_V5A2029-1.jpg", alt: "グルメ写真" },
+    { src: "photos/hero/_V5A7737-1.jpg", alt: "スイーツ写真" },
   ],
 
   /* --- グリッドギャラリー（縦横バラバラでOK） --- */
