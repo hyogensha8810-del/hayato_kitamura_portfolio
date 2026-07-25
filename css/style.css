@@ -170,9 +170,16 @@ a { color: inherit; text-decoration: none; }
   cursor: zoom-in;
   position: relative;
   background: var(--bg-soft);
+  /* 高さをあらかじめ確保しておくことで、画像の読み込み完了時に
+     グリッドがガクガク動く（レイアウトシフト）のを防ぐ */
+  aspect-ratio: 4 / 5;
 }
 .masonry .ph img {
+  position: absolute;
+  inset: 0;
   width: 100%;
+  height: 100%;
+  object-fit: cover;
   transition: transform 1.2s ease, opacity .8s;
   opacity: 0;
 }
