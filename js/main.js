@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const masonry = document.getElementById('masonry');
-  if (masonry && typeof SITE_PHOTOS !== 'undefined') {
-    SITE_PHOTOS.gallery.forEach(p => {
+  function buildGrid(container, list) {
+    if (!container || !list) return;
+    list.forEach(p => {
       const fig = document.createElement('figure');
       fig.className = 'ph';
       const img = document.createElement('img');
@@ -46,8 +46,13 @@ document.addEventListener('DOMContentLoaded', () => {
       img.addEventListener('load', () => img.classList.add('loaded'));
       fig.appendChild(img);
       fig.addEventListener('click', () => openLightbox(p.src, p.alt));
-      masonry.appendChild(fig);
+      container.appendChild(fig);
     });
+  }
+
+  if (typeof SITE_PHOTOS !== 'undefined') {
+    buildGrid(document.getElementById('masonry'), SITE_PHOTOS.gallery);
+    buildGrid(document.getElementById('masonryWide'), SITE_PHOTOS.galleryWide);
   }
 
   /* ライトボックス */
