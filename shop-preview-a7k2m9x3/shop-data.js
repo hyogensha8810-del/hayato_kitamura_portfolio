@@ -87,52 +87,6 @@ window.SHOP_DATA = {
   "formspreeId": "mykrapal",
   "products": [
     {
-      "id": "w1",
-      "title": "朝霧の湖",
-      "type": "photo",
-      "kind": "print",
-      "place": "長野県",
-      "year": "2025",
-      "status": "public",
-      "desc": "夜明け前、湖面に霧が立ちこめる数分間だけ現れる景色です。三脚を立てて日の出を待ちました。",
-      "images": [
-        "../photos/shop/asagiri-no-mizuumi-main.jpg",
-        "../photos/shop/asagiri-no-mizuumi-room1.jpg",
-        "../photos/shop/asagiri-no-mizuumi-room2.jpg"
-      ],
-      "prices": {
-        "postcard": 1800,
-        "a5": 2500,
-        "a4": 3800,
-        "a3": 7500,
-        "a2": 11000,
-        "a1": 16500
-      }
-    },
-    {
-      "id": "w2",
-      "title": "夕暮れの路地",
-      "type": "oil",
-      "kind": "print",
-      "place": "ポルトガル・リスボン",
-      "year": "2024",
-      "status": "public",
-      "desc": "坂道の街に灯りがともりはじめる時間。写真に油彩調の加工を施したポスターです。",
-      "images": [
-        "../photos/shop/yugure-no-roji-main.jpg",
-        "../photos/shop/yugure-no-roji-room1.jpg",
-        "../photos/shop/yugure-no-roji-room2.jpg"
-      ],
-      "prices": {
-        "postcard": 1800,
-        "a5": 2500,
-        "a4": 3800,
-        "a3": 7500,
-        "a2": 11000,
-        "a1": 16500
-      }
-    },
-    {
       "id": "w3",
       "title": "窓辺の光",
       "type": "photo",
@@ -153,52 +107,6 @@ window.SHOP_DATA = {
         "a3": 7500,
         "a2": 11000,
         "a1": null
-      }
-    },
-    {
-      "id": "w4",
-      "title": "冬の並木",
-      "type": "photo",
-      "kind": "print",
-      "place": "北海道",
-      "year": "2023",
-      "status": "public",
-      "desc": "雪の朝、音が消えた並木道。モノトーンに近い階調が出ました。",
-      "images": [
-        "../photos/shop/fuyu-no-namiki-main.jpg",
-        "../photos/shop/fuyu-no-namiki-room1.jpg",
-        "../photos/shop/fuyu-no-namiki-room2.jpg"
-      ],
-      "prices": {
-        "postcard": 1800,
-        "a5": 2500,
-        "a4": 3800,
-        "a3": 7500,
-        "a2": 11000,
-        "a1": 16500
-      }
-    },
-    {
-      "id": "w5",
-      "title": "海辺の朝",
-      "type": "oil",
-      "kind": "print",
-      "place": "静岡県",
-      "year": "2024",
-      "status": "public",
-      "desc": "朝焼けの桟橋。写真に油彩調の加工を施したポスターです。",
-      "images": [
-        "../photos/shop/umibe-no-asa-main.jpg",
-        "../photos/shop/umibe-no-asa-room1.jpg",
-        "../photos/shop/umibe-no-asa-room2.jpg"
-      ],
-      "prices": {
-        "postcard": 1800,
-        "a5": 2500,
-        "a4": 3800,
-        "a3": 7500,
-        "a2": 11000,
-        "a1": 16500
       }
     },
     {
