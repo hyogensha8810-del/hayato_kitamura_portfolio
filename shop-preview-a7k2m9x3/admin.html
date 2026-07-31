@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>商品管理 | SHOP | HAYATO KITAMURA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Noto+Serif+JP:wght@200;300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="shop.css">
+</head>
+<body>
+
+<main class="shop-page shop-body" id="adm"></main>
+
+<script src="shop-data.js"></script>
+<script src="shop.js"></script>
+<script>
+(function () {
+'use strict';
+var U = window.SHOP_UTIL, D = window.SHOP_DATA;
+var yen = U.yen, esc = U.esc;
+var CFG_KEY = 'hk_shop_admin_cfg';
+var DATA_PATH = 'shop-preview-a7k2m9x3/shop-data.js';
+var IMG_DIR = 'photos/shop';
+var sel = null, dirty = false;
+
+function el(id) { return document.getElementById(id); }
+function qsa(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
+function cfg() { try { return JSON.parse(localStorage.getItem(CFG_KEY)) || {}; } catch (e) { return {}; } }
+function setCfg(c) { localStorage.setItem(CFG_KEY, JSON.stringify(c)); }
+function status(msg, kind) {
+  var s = el('admStatus'); if (!s) return;
+  s.className = 'adm-status ' + (kind || 'busy'); s.innerHTML = msg;
+}
+
+/* ============ GitHub API ============ */
+function gh(path, opts) {
+  var c = cfg();
+  opts = opts || {};
+  opts.headers = Object.assign({
+    'Authorization': 'Bearer ' + c.token,
+    'Accept': 'application/vnd.github+json',
+    'X-GitHub-Api-Version': '2022-11-28'
+  }, opts.headers || {});
+  return fetch('https://api.github.com/repos/' + c.owner + '/' + c.repo + path, opts)
+    .then(function (r) {
+      return r.json().then(function (j) {
+        if (!r.ok) throw new Error(j.message || ('HTTP ' + r.status));
+        return j;
+      });
+    });
+}
+function getSha(path) {
+  var c = cfg();
+  return gh('/contents/' + path + '?ref=' + c.branch)
+    .then(function (j) { return j.sha; })
+    .catch(function () { return null; });
+}
+function putFile(path, b64, message) {
+  var c = cfg();
+  return getSha(path).then(function (sha) {
+    var body = { message: message, content: b64, branch: c.branch };
+    if (sha) body.sha = sha;
+    return gh('/contents/' + path, { method: 'PUT', body: JSON.stringify(body) });
+  });
+}
+function utf8b64(str) {
+  return btoa(String.fromCharCode.apply(null, new TextEncoder().encode(str)));
+}
+
+/* ============ shop-data.js を書き出す ============ */
+var HEADER = [
+'/* =========================================================',
+'   ★ SHOPの商品はこのファイルで管理します ★',
+'',
+'   通常は「管理画面」(admin.html) から編集してください。',
+'   保存ボタンを押すと、このファイルが自動で書き換わります。',
+'',
+'   手で直接編集することもできます。その場合は下記のルールで。',
+'   -------------------------------------------------------',
+'   id        … 半角英数字。他とかぶらない名前。あとから変えない',
+'   title     … 作品タイトル（お客様に表示されます）',
+"   type      … 'photo' = 写真プリント / 'oil' = 油絵風ポスター",
+"   kind      … 'print' = 都度印刷（サイズ選択あり）",
+"                'framed' = 印刷済み・額付きの1点もの",
+'   place     … 撮影地',
+'   year      … 撮影年',
+'   desc      … 作品説明（2〜3行）',
+'   images    … 1枚目=作品本体、2枚目以降=飾った様子',
+'   prices    … サイズ別の価格（送料込み）。null にするとそのサイズは選べません',
+"   status    … 'public' = 公開 / 'draft' = 下書き（一覧に出ません）",
+'',
+"   ▼ kind が 'framed' のときだけ使う項目",
+"   fixedSize   … 'a2' などサイズを固定",
+'   framedPrice … 額付きの価格（送料込み）',
+'   stock       … 1 なら販売中、0 なら SOLD OUT',
+'   ========================================================= */',
+'', 'window.SHOP_DATA = '].join('\n');
+
+function serialize() {
+  var out = {
+    sizes: D.sizes, lead: D.lead, repeatDiscount: D.repeatDiscount,
+    shippingIncluded: D.shippingIncluded, formspreeId: D.formspreeId, products: D.products
+  };
+  return HEADER + JSON.stringify(out, null, 2) + ';\n';
+}
+
+/* ============ 画像のリサイズ ============ */
+function resizeToBlob(file, max) {
+  return new Promise(function (res, rej) {
+    var img = new Image(), url = URL.createObjectURL(file);
+    img.onload = function () {
+      URL.revokeObjectURL(url);
+      var w = img.width, h = img.height, s = Math.min(1, max / Math.max(w, h));
+      var cv = document.createElement('canvas');
+      cv.width = Math.round(w * s); cv.height = Math.round(h * s);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      cv.toBlob(function (b) { b ? res(b) : rej(new Error('画像を変換できませんでした')); }, 'image/jpeg', 0.86);
+    };
+    img.onerror = function () { URL.revokeObjectURL(url); rej(new Error('画像を読み込めませんでした')); };
+    img.src = url;
+  });
+}
+function blobToB64(blob) {
+  return new Promise(function (res, rej) {
+    var r = new FileReader();
+    r.onload = function () { res(String(r.result).split(',')[1]); };
+    r.onerror = rej;
+    r.readAsDataURL(blob);
+  });
+}
+function slug(s) {
+  return (s || 'work').replace(/[^\w\-]+/g, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'work';
+}
+
+/* ============ 設定画面（トークン未設定のとき） ============ */
+function gate() {
+  var c = cfg();
+  el('adm').innerHTML =
+  '<div class="shop-lead"><h1 class="page-title">ADMIN</h1><p class="page-title-jp">商品管理の初期設定</p></div>' +
+  '<div class="adm-panel adm-gate">' +
+    '<h3>GitHubへの接続設定（初回だけ）</h3>' +
+    '<p class="adm-note">この画面から商品を保存できるようにするため、GitHubの「アクセストークン」を1つ作ります。' +
+    '入力したトークンは<b style="color:var(--accent);font-weight:400">このブラウザの中だけ</b>に保存され、外部には一切送信されません。</p>' +
+    '<ol>' +
+      '<li><a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">GitHubのトークン作成ページ</a>を開きます（要ログイン）</li>' +
+      '<li><b>Token name</b> … <code>shop-admin</code> など分かる名前を入力</li>' +
+      '<li><b>Expiration</b> … <code>90 days</code> か <code>No expiration</code> を選択</li>' +
+      '<li><b>Repository access</b> … <code>Only select repositories</code> を選び、' +
+        '<code>hayato_kitamura_portfolio</code> を選択</li>' +
+      '<li><b>Permissions</b> → <b>Repository permissions</b> の中の <code>Contents</code> を <code>Read and write</code> に変更' +
+        '<br><span class="adm-note">（他の項目は触らなくて大丈夫です）</span></li>' +
+      '<li>いちばん下の <b>Generate token</b> を押し、表示された <code>github_pat_...</code> をコピー</li>' +
+      '<li>下の欄に貼り付けて「接続する」を押す</li>' +
+    '</ol>' +
+    '<div class="adm-row"><span>GitHubユーザー名</span><input class="shop-input" id="g_owner" value="' + esc(c.owner || 'hyogensha8810-del') + '"></div>' +
+    '<div class="adm-row"><span>リポジトリ名</span><input class="shop-input" id="g_repo" value="' + esc(c.repo || 'hayato_kitamura_portfolio') + '"></div>' +
+    '<div class="adm-row"><span>ブランチ</span><input class="shop-input" id="g_branch" value="' + esc(c.branch || 'main') + '"></div>' +
+    '<div class="adm-row"><span>アクセストークン</span><input class="shop-input" id="g_token" type="password" placeholder="github_pat_..." autocomplete="off"></div>' +
+    '<div class="adm-btns"><button class="btn-gold" id="g_save">接続する</button>' +
+    '<span class="adm-note">トークンは他人に見せないでください。漏れた場合はGitHubの設定画面から削除できます。</span></div>' +
+    '<div id="admStatus"></div>' +
+  '</div>';
+
+  el('g_save').onclick = function () {
+    var t = el('g_token').value.trim();
+    if (!t) { status('トークンを貼り付けてください', 'ng'); return; }
+    setCfg({ owner: el('g_owner').value.trim(), repo: el('g_repo').value.trim(),
+             branch: el('g_branch').value.trim() || 'main', token: t });
+    status('接続を確認しています…', 'busy');
+    gh('').then(function () {
+      status('接続できました。商品管理を開きます…', 'ok');
+      setTimeout(main, 700);
+    }).catch(function (e) {
+      status('接続できませんでした：' + esc(e.message) + '<br>ユーザー名・リポジトリ名・トークンの権限（Contents: Read and write）をご確認ください。', 'ng');
+    });
+  };
+}
+
+/* ============ 管理画面 本体 ============ */
+function main() {
+  U.chrome('Shop');
+  el('adm').innerHTML =
+  '<div class="shop-lead"><h1 class="page-title">ADMIN</h1><p class="page-title-jp">商品管理</p>' +
+  '<p>作品を選んで編集し、「保存してサイトに反映」を押すとGitHubへ自動で反映されます。<br>' +
+  '反映されるまで1分ほどかかります。</p></div>' +
+  '<div class="adm-list" id="admList"></div>' +
+  '<div id="admPanel"></div>';
+  drawList();
+  drawPanel();
+}
+function drawList() {
+  el('admList').innerHTML = D.products.map(function (p) {
+    var t = p.kind === 'framed' ? '額付き1点もの' : (p.type === 'oil' ? '油絵風' : '写真');
+    var s = p.status === 'public' ? '公開中' : '下書き';
+    return '<button class="adm-item' + (sel === p.id ? ' on' : '') + '" data-a="' + p.id + '">' +
+      '<img src="' + (p.images && p.images[0] || '') + '" alt="">' +
+      '<div class="n">' + esc(p.title) + '</div><div class="s">' + t + '・' + s + '</div></button>';
+  }).join('') +
+  '<button class="adm-item" id="admNew" style="display:flex;align-items:center;justify-content:center;min-height:150px;color:var(--accent)">＋ 新しい作品を追加</button>';
+
+  qsa('.adm-item[data-a]').forEach(function (b) {
+    b.onclick = function () { sel = b.dataset.a; drawList(); drawPanel(); };
+  });
+  el('admNew').onclick = function () {
+    var id = 'w' + Date.now().toString(36);
+    D.products.push({ id: id, title: '新しい作品', type: 'photo', kind: 'print',
+      place: '', year: String(new Date().getFullYear()), status: 'draft', desc: '',
+      images: ['../photos/shop/asagiri-no-mizuumi-main.jpg'],
+      prices: { postcard: 1800, a5: 2500, a4: 3800, a3: 7500, a2: 11000, a1: 16500 } });
+    sel = id; dirty = true; drawList(); drawPanel();
+    status('新しい作品を追加しました。内容を入力して保存してください。', 'ok');
+  };
+}
+function drawPanel() {
+  var box = el('admPanel');
+  if (!sel) { box.innerHTML = '<div class="adm-panel"><p class="adm-note">上から作品を選ぶと、ここに編集フォームが開きます。</p></div>'; return; }
+  var p = null;
+  for (var i = 0; i < D.products.length; i++) if (D.products[i].id === sel) p = D.products[i];
+  if (!p) { sel = null; drawPanel(); return; }
+  var framed = p.kind === 'framed';
+  var ship = D.shippingIncluded;
+
+  box.innerHTML = '<div class="adm-panel">' +
+    '<h3>' + esc(p.title) + '　<span style="color:var(--text-dim);font-size:.7rem">id: ' + esc(p.id) + '</span></h3>' +
+    '<div class="adm-row"><span>作品タイトル</span><input class="shop-input" id="a_title" value="' + esc(p.title) + '"></div>' +
+    '<div class="adm-row"><span>種別</span><select class="shop-select" id="a_kind">' +
+      '<option value="photo"' + (p.type === 'photo' && !framed ? ' selected' : '') + '>写真プリント（都度印刷）</option>' +
+      '<option value="oil"' + (p.type === 'oil' ? ' selected' : '') + '>油絵風ポスター（都度印刷）</option>' +
+      '<option value="framed"' + (framed ? ' selected' : '') + '>1点もの・額付き（在庫制）</option></select></div>' +
+    '<div class="adm-row"><span>撮影地</span><input class="shop-input" id="a_place" value="' + esc(p.place) + '"></div>' +
+    '<div class="adm-row"><span>撮影年</span><input class="shop-input" id="a_year" value="' + esc(p.year) + '"></div>' +
+    '<div class="adm-row"><span>作品説明</span><textarea class="shop-area" id="a_desc" style="min-height:88px">' + esc(p.desc) + '</textarea></div>' +
+    '<div class="adm-row"><span>画像</span><div class="adm-slots">' +
+      (p.images || []).map(function (s, i) {
+        return '<div class="adm-slot"><img src="' + s + '" alt="">' +
+          '<div class="lb">' + (i === 0 ? '作品本体' : (framed && i === 1 ? '額装の状態' : '飾った様子 ' + i)) + '</div>' +
+          '<input type="file" accept="image/*" data-slot="' + i + '">' +
+          (i > 0 ? '<button class="btn-ghost" data-del="' + i + '" style="width:120px;padding:4px;font-size:.62rem;margin-top:4px;cursor:pointer">削除</button>' : '') +
+          '</div>'; }).join('') +
+      '<div class="adm-slot"><div class="ph">＋</div><div class="lb">画像を追加</div>' +
+      '<input type="file" accept="image/*" data-slot="new"></div>' +
+    '</div></div>' +
+    (framed
+      ? '<div class="adm-row"><span>サイズ</span><select class="shop-select" id="a_fixed">' +
+          D.sizes.map(function (s) { return '<option value="' + s.key + '"' + (p.fixedSize === s.key ? ' selected' : '') + '>' + s.label + ' — ' + s.mm + '</option>'; }).join('') + '</select></div>' +
+        '<div class="adm-row"><span>価格（送料込）</span><input class="shop-input" type="number" id="a_fprice" value="' + (p.framedPrice || 0) + '"></div>' +
+        '<div class="adm-row"><span>在庫</span><select class="shop-select" id="a_stock">' +
+          '<option value="1"' + (p.stock > 0 ? ' selected' : '') + '>販売中（残り1点）</option>' +
+          '<option value="0"' + (p.stock <= 0 ? ' selected' : '') + '>SOLD OUT</option></select></div>'
+      : '<div class="adm-row"><span>サイズ別価格</span><div class="adm-prices">' +
+          D.sizes.map(function (s) {
+            var v = p.prices && p.prices[s.key];
+            return '<div><label>' + s.label + '（' + s.mm + '）</label>' +
+              '<input class="shop-input" type="number" data-price="' + s.key + '" value="' + (v || '') + '" placeholder="取扱なし"></div>'; }).join('') +
+        '</div></div>' +
+        '<div class="adm-row"><span></span><p class="adm-note">空欄にすると、そのサイズは選択肢に出なくなります（元データの解像度が足りない場合など）。<br>' +
+        '価格には送料を含めてください。目安：ハガキ〜A4 ' + yen(ship.small) + ' / A3・A2 ' + yen(ship.mid) + ' / A1 ' + yen(ship.large) + '</p></div>') +
+    '<div class="adm-row"><span>公開状態</span><select class="shop-select" id="a_status">' +
+      '<option value="public"' + (p.status === 'public' ? ' selected' : '') + '>公開</option>' +
+      '<option value="draft"' + (p.status === 'draft' ? ' selected' : '') + '>下書き（一覧に出しません）</option></select></div>' +
+    '<div class="adm-btns">' +
+      '<button class="btn-gold" id="a_save">保存してサイトに反映</button>' +
+      '<button class="btn-ghost" id="a_json">shop-data.js の中身を見る</button>' +
+      '<button class="btn-ghost" id="a_del" style="margin-left:auto;border-color:rgba(208,138,114,.4);color:#d08a72">この作品を削除</button>' +
+    '</div>' +
+    '<div id="admStatus"></div>' +
+    '<textarea class="adm-json shop-area" id="a_jsonout" style="display:none" readonly></textarea>' +
+    '<div class="adm-btns" style="margin-top:26px;padding-top:22px;border-top:1px solid rgba(232,226,217,.1)">' +
+      '<button class="btn-ghost" id="a_logout" style="font-size:.72rem">GitHubの接続を解除（トークンをこの端末から削除）</button></div>' +
+  '</div>';
+
+  /* 画像アップロード */
+  qsa('#admPanel input[type=file]').forEach(function (inp) {
+    inp.onchange = function () {
+      var f = inp.files[0]; if (!f) return;
+      var slot = inp.dataset.slot;
+      var name = slug(p.id) + '-' + (slot === 'new' ? p.images.length + 1 : (+slot === 0 ? 'main' : 'sub' + slot)) + '-' + Date.now().toString(36) + '.jpg';
+      status('画像を縮小してアップロードしています…', 'busy');
+      resizeToBlob(f, 1800).then(blobToB64).then(function (b64) {
+        return putFile(IMG_DIR + '/' + name, b64, 'shop: 画像アップロード ' + name);
+      }).then(function () {
+        var path = '../' + IMG_DIR + '/' + name;
+        if (slot === 'new') p.images.push(path); else p.images[+slot] = path;
+        dirty = true;
+        status('画像をアップロードしました。<b style="color:var(--accent);font-weight:400">まだ商品には反映されていません</b> — 「保存してサイトに反映」を押してください。', 'ok');
+        drawPanel();
+      }).catch(function (e) { status('アップロードに失敗しました：' + esc(e.message), 'ng'); });
+    };
+  });
+  qsa('#admPanel [data-del]').forEach(function (b) {
+    b.onclick = function () { p.images.splice(+b.dataset.del, 1); dirty = true; drawPanel(); };
+  });
+
+  /* 保存 */
+  el('a_save').onclick = function () {
+    p.title = el('a_title').value.trim() || p.title;
+    p.place = el('a_place').value.trim();
+    p.year = el('a_year').value.trim();
+    p.desc = el('a_desc').value.trim();
+    p.status = el('a_status').value;
+    var k = el('a_kind').value;
+    if (k === 'framed') {
+      p.kind = 'framed'; p.type = 'photo';
+      p.fixedSize = el('a_fixed') ? el('a_fixed').value : (p.fixedSize || 'a2');
+      p.framedPrice = el('a_fprice') ? (+el('a_fprice').value || 0) : (p.framedPrice || 0);
+      p.stock = el('a_stock') ? +el('a_stock').value : 1;
+      delete p.prices;
+    } else {
+      p.kind = 'print'; p.type = k; p.prices = p.prices || {};
+      qsa('#admPanel [data-price]').forEach(function (i) {
+        var v = i.value.trim(); p.prices[i.dataset.price] = v ? +v : null;
+      });
+      delete p.fixedSize; delete p.framedPrice; delete p.stock;
+    }
+    status('保存しています…', 'busy');
+    putFile(DATA_PATH, utf8b64(serialize()), 'shop: ' + p.title + ' を更新')
+      .then(function () {
+        dirty = false;
+        status('保存しました。GitHubへ反映済みです。<br>実際のページに出るまで1分ほどかかります（GitHub Pagesの反映待ち）。<br>' +
+               '<a href="index.html" style="color:var(--accent)">一覧を見る →</a>', 'ok');
+        drawList();
+      })
+      .catch(function (e) { status('保存に失敗しました：' + esc(e.message), 'ng'); });
+  };
+
+  el('a_json').onclick = function () {
+    var t = el('a_jsonout'); t.style.display = 'block'; t.value = serialize();
+  };
+  el('a_del').onclick = function () {
+    if (!confirm('「' + p.title + '」を削除します。よろしいですか？')) return;
+    D.products = D.products.filter(function (x) { return x.id !== sel; });
+    sel = null;
+    status('削除しています…', 'busy');
+    putFile(DATA_PATH, utf8b64(serialize()), 'shop: 作品を削除')
+      .then(function () { drawList(); drawPanel(); status('削除しました。', 'ok'); })
+      .catch(function (e) { status('削除に失敗しました：' + esc(e.message), 'ng'); });
+  };
+  el('a_logout').onclick = function () {
+    if (!confirm('この端末に保存されているGitHubトークンを削除します。よろしいですか？')) return;
+    localStorage.removeItem(CFG_KEY); location.reload();
+  };
+}
+
+window.addEventListener('beforeunload', function (e) {
+  if (dirty) { e.preventDefault(); e.returnValue = ''; }
+});
+
+/* 起動 */
+if (cfg().token) main(); else { U.chrome('Shop'); gate(); }
+})();
+</script>
+</body>
+</html>
