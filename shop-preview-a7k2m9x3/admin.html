@@ -188,9 +188,86 @@ function main() {
   '<p>作品を選んで編集し、「保存してサイトに反映」を押すとGitHubへ自動で反映されます。<br>' +
   '反映されるまで1分ほどかかります。</p></div>' +
   '<div class="adm-list" id="admList"></div>' +
-  '<div id="admPanel"></div>';
+  '<div id="admPanel"></div>' +
+  '<div class="adm-panel" style="margin-top:22px">' +
+    '<h3>画像の整理</h3>' +
+    '<p class="adm-note">どの作品からも使われていない画像を探して、まとめて削除します。<br>' +
+    '作品を差し替えたときに残った古い画像や、削除した作品の画像が対象です。<br>' +
+    '<b style="color:var(--accent);font-weight:400">使用中の画像は絶対に削除しません。</b>削除する前に一覧を表示します。</p>' +
+    '<div class="adm-btns"><button class="btn-ghost" id="c_scan">使っていない画像を探す</button></div>' +
+    '<div id="cleanStatus"></div><div id="cleanList"></div>' +
+  '</div>';
   drawList();
   drawPanel();
+  bindCleanup();
+}
+
+/* ============ 使っていない画像の整理 ============ */
+function cstatus(msg, kind) {
+  var s = el('cleanStatus'); if (!s) return;
+  s.className = 'adm-status ' + (kind || 'busy'); s.innerHTML = msg;
+}
+function usedPaths() {
+  var used = {};
+  D.products.forEach(function (p) {
+    (p.images || []).forEach(function (im) { used[String(im).replace(/^\.\.\//, '')] = true; });
+  });
+  return used;
+}
+/* 複数ファイルの削除を「1つのコミット」にまとめる（GitHubのGit Data APIを使用） */
+function bulkDelete(paths, message) {
+  var c = cfg(), head, treeSha;
+  return gh('/git/ref/heads/' + c.branch)
+    .then(function (r) { head = r.object.sha; return gh('/git/commits/' + head); })
+    .then(function (cm) {
+      treeSha = cm.tree.sha;
+      return gh('/git/trees', { method: 'POST', body: JSON.stringify({
+        base_tree: treeSha,
+        tree: paths.map(function (p) { return { path: p, mode: '100644', type: 'blob', sha: null }; })
+      })});
+    })
+    .then(function (t) {
+      return gh('/git/commits', { method: 'POST', body: JSON.stringify({
+        message: message, tree: t.sha, parents: [head] })});
+    })
+    .then(function (nc) {
+      return gh('/git/refs/heads/' + c.branch, { method: 'PATCH', body: JSON.stringify({ sha: nc.sha }) });
+    });
+}
+function bindCleanup() {
+  el('c_scan').onclick = function () {
+    cstatus('画像を確認しています…', 'busy');
+    el('cleanList').innerHTML = '';
+    gh('/contents/' + IMG_DIR + '?ref=' + cfg().branch).then(function (files) {
+      var used = usedPaths();
+      var unused = files.filter(function (f) {
+        return f.type === 'file' && !used[IMG_DIR + '/' + f.name];
+      });
+      var inUse = files.length - unused.length;
+      if (!unused.length) {
+        cstatus('使っていない画像はありませんでした。（' + inUse + '枚すべてが使用中です）', 'ok');
+        return;
+      }
+      cstatus('使用中 ' + inUse + '枚 ／ <b style="color:var(--accent);font-weight:400">使っていない画像 ' + unused.length + '枚</b>', 'ok');
+      el('cleanList').innerHTML =
+        '<div style="max-height:200px;overflow:auto;border:1px solid rgba(232,226,217,.12);padding:12px 14px;margin-top:14px;font-size:.72rem;line-height:1.9;color:var(--text-dim)">' +
+        unused.map(function (f) { return esc(f.name); }).join('<br>') + '</div>' +
+        '<div class="adm-btns"><button class="btn-gold" id="c_del">この' + unused.length + '枚を削除する</button>' +
+        '<span class="adm-note">1回のコミットでまとめて削除します。取り消したい場合はGitHubの履歴から戻せます。</span></div>';
+      el('c_del').onclick = function () {
+        if (!confirm('使っていない画像 ' + unused.length + '枚を削除します。よろしいですか？')) return;
+        el('c_del').disabled = true;
+        cstatus('削除しています…', 'busy');
+        bulkDelete(unused.map(function (f) { return IMG_DIR + '/' + f.name; }),
+                   'shop: 使っていない画像 ' + unused.length + '枚を削除')
+          .then(function () {
+            cstatus(unused.length + '枚を削除しました。<br>サイトへの反映まで1分ほどかかります。', 'ok');
+            el('cleanList').innerHTML = '';
+          })
+          .catch(function (e) { cstatus('削除に失敗しました：' + esc(e.message), 'ng'); el('c_del').disabled = false; });
+      };
+    }).catch(function (e) { cstatus('画像の一覧を取得できませんでした：' + esc(e.message), 'ng'); });
+  };
 }
 function drawList() {
   el('admList').innerHTML = D.products.map(function (p) {
