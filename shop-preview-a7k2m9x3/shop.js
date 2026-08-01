@@ -199,8 +199,9 @@ window.shopInitProduct = function () {
     '</div>' +
     '<div class="shop-info">' +
       '<h1>' + esc(p.title) + '</h1>' +
-      '<div class="sub">' + esc(p.place) + '　' + esc(p.year) + '　/　FREE SHIPPING</div>' +
-      '<p class="body">' + esc(p.desc) + '</p>' + oilNote +
+      '<div class="sub">' + [esc(p.place), esc(p.year), 'FREE SHIPPING']
+        .filter(function (s) { return s; }).join('　/　') + '</div>' +
+      (p.desc ? '<p class="body">' + esc(p.desc).replace(/\n/g, '<br>') + '</p>' : '') + oilNote +
       (framed
         ? '<div class="shop-calc" style="margin-top:28px"><div class="grand"><span class="lb">価格（税込・送料込）</span><span class="vl">' + yen(p.framedPrice) + '</span></div>' +
           '<div class="when">在庫：' + (soldout ? 'SOLD OUT' : '残り1点') + '　/　ご入金確認後 3営業日以内に発送</div></div>'

@@ -25,7 +25,7 @@ var yen = U.yen, esc = U.esc;
 var CFG_KEY = 'hk_shop_admin_cfg';
 var DATA_PATH = 'shop-preview-a7k2m9x3/shop-data.js';
 var IMG_DIR = 'photos/shop';
-var sel = null, dirty = false;
+var sel = null, dirty = false, pendingCollect = null;
 
 function el(id) { return document.getElementById(id); }
 function qsa(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
@@ -203,9 +203,13 @@ function drawList() {
   '<button class="adm-item" id="admNew" style="display:flex;align-items:center;justify-content:center;min-height:150px;color:var(--accent)">＋ 新しい作品を追加</button>';
 
   qsa('.adm-item[data-a]').forEach(function (b) {
-    b.onclick = function () { sel = b.dataset.a; drawList(); drawPanel(); };
+    b.onclick = function () {
+      if (pendingCollect) pendingCollect();   // 編集中の内容を保持したまま切り替える
+      sel = b.dataset.a; drawList(); drawPanel();
+    };
   });
   el('admNew').onclick = function () {
+    if (pendingCollect) pendingCollect();
     var id = 'w' + Date.now().toString(36);
     D.products.push({ id: id, title: '新しい作品', type: 'photo', kind: 'print',
       place: '', year: String(new Date().getFullYear()), status: 'draft', desc: '',
@@ -217,6 +221,7 @@ function drawList() {
 }
 function drawPanel() {
   var box = el('admPanel');
+  pendingCollect = null;
   if (!sel) { box.innerHTML = '<div class="adm-panel"><p class="adm-note">上から作品を選ぶと、ここに編集フォームが開きます。</p></div>'; return; }
   var p = null;
   for (var i = 0; i < D.products.length; i++) if (D.products[i].id === sel) p = D.products[i];
@@ -273,10 +278,53 @@ function drawPanel() {
       '<button class="btn-ghost" id="a_logout" style="font-size:.72rem">GitHubの接続を解除（トークンをこの端末から削除）</button></div>' +
   '</div>';
 
+  /* 入力欄の内容を作品データに書き戻す
+     （画面を描き直す前に必ず呼ぶ。呼ばないと入力途中の文字が消えます） */
+  function collectForm() {
+    if (!el('a_title')) return;
+    p.title = el('a_title').value.trim() || p.title;
+    p.place = el('a_place').value.trim();
+    p.year  = el('a_year').value.trim();
+    p.desc  = el('a_desc').value;
+    p.status = el('a_status').value;
+    var k = el('a_kind').value;
+    if (k === 'framed') {
+      p.kind = 'framed'; p.type = 'photo';
+      if (el('a_fixed'))  p.fixedSize = el('a_fixed').value;
+      if (el('a_fprice')) p.framedPrice = +el('a_fprice').value || 0;
+      if (el('a_stock'))  p.stock = +el('a_stock').value;
+      if (!p.fixedSize) p.fixedSize = 'a2';
+      if (p.stock == null) p.stock = 1;
+      /* prices は消さずに残す。種別を写真に戻したとき価格が復活します */
+    } else {
+      p.kind = 'print'; p.type = k;
+      if (!p.prices) p.prices = { postcard: null, a5: null, a4: null, a3: null, a2: null, a1: null };
+      qsa('#admPanel [data-price]').forEach(function (i) {
+        var v = i.value.trim(); p.prices[i.dataset.price] = v ? +v : null;
+      });
+      /* framed 用の項目も消さずに残す（額付きに戻したとき復活します） */
+    }
+  }
+
+  /* 入力するそばからデータに反映しておく（不意の消失を防ぐ） */
+  qsa('#admPanel input, #admPanel textarea, #admPanel select').forEach(function (i) {
+    if (i.type === 'file') return;
+    i.addEventListener('input', function () { collectForm(); dirty = true; });
+  });
+
+  /* 種別を切り替えたら、その場で入力欄を作り直す */
+  el('a_kind').addEventListener('change', function () {
+    collectForm(); dirty = true; drawPanel();
+  });
+
+  /* 作品を切り替えるときにも内容を保持できるよう、外から呼べるようにしておく */
+  pendingCollect = collectForm;
+
   /* 画像アップロード */
   qsa('#admPanel input[type=file]').forEach(function (inp) {
     inp.onchange = function () {
       var f = inp.files[0]; if (!f) return;
+      collectForm();
       var slot = inp.dataset.slot;
       var name = slug(p.id) + '-' + (slot === 'new' ? p.images.length + 1 : (+slot === 0 ? 'main' : 'sub' + slot)) + '-' + Date.now().toString(36) + '.jpg';
       status('画像を縮小してアップロードしています…', 'busy');
@@ -292,30 +340,12 @@ function drawPanel() {
     };
   });
   qsa('#admPanel [data-del]').forEach(function (b) {
-    b.onclick = function () { p.images.splice(+b.dataset.del, 1); dirty = true; drawPanel(); };
+    b.onclick = function () { collectForm(); p.images.splice(+b.dataset.del, 1); dirty = true; drawPanel(); };
   });
 
   /* 保存 */
   el('a_save').onclick = function () {
-    p.title = el('a_title').value.trim() || p.title;
-    p.place = el('a_place').value.trim();
-    p.year = el('a_year').value.trim();
-    p.desc = el('a_desc').value.trim();
-    p.status = el('a_status').value;
-    var k = el('a_kind').value;
-    if (k === 'framed') {
-      p.kind = 'framed'; p.type = 'photo';
-      p.fixedSize = el('a_fixed') ? el('a_fixed').value : (p.fixedSize || 'a2');
-      p.framedPrice = el('a_fprice') ? (+el('a_fprice').value || 0) : (p.framedPrice || 0);
-      p.stock = el('a_stock') ? +el('a_stock').value : 1;
-      delete p.prices;
-    } else {
-      p.kind = 'print'; p.type = k; p.prices = p.prices || {};
-      qsa('#admPanel [data-price]').forEach(function (i) {
-        var v = i.value.trim(); p.prices[i.dataset.price] = v ? +v : null;
-      });
-      delete p.fixedSize; delete p.framedPrice; delete p.stock;
-    }
+    collectForm();
     status('保存しています…', 'busy');
     putFile(DATA_PATH, utf8b64(serialize()), 'shop: ' + p.title + ' を更新')
       .then(function () {
