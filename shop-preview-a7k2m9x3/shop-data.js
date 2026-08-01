@@ -449,6 +449,27 @@ window.SHOP_DATA = {
         "a2": 38000,
         "a1": 88000
       }
+    },
+    {
+      "id": "wms9uky13",
+      "title": "paris morning.",
+      "type": "oil",
+      "kind": "print",
+      "place": "",
+      "year": "",
+      "status": "public",
+      "desc": "",
+      "images": [
+        "../photos/shop/wms9uky13-main-ms9ulduv.jpg"
+      ],
+      "prices": {
+        "postcard": 2200,
+        "a5": 5500,
+        "a4": 13800,
+        "a3": 28000,
+        "a2": 58000,
+        "a1": 88000
+      }
     }
   ]
 };
