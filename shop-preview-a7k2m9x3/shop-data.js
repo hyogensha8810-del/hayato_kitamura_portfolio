@@ -334,6 +334,30 @@ window.SHOP_DATA = {
         "a2": 55000,
         "a1": 88000
       }
+    },
+    {
+      "id": "wms9m02x9",
+      "title": "甘さの究極。",
+      "type": "photo",
+      "kind": "print",
+      "place": "Tokyo",
+      "year": "2024",
+      "status": "public",
+      "desc": "あなたにとって、究極に癒されるときはどんなときですか？\n\n最高にみずみずしい最高級の桃が美しく花開く。\nその奥にあるものを知りたい･･･。\n\n理性が飛び、無心で手をのばすワクワク感。\nそんな瞬間を撮影しました。\n\n個展ではマット系のブラックフレームに入れて展示。\n神秘的でふしぎな輝きをはなつ、魔力ある１点です。",
+      "images": [
+        "../photos/shop/wms9m02x9-main-ms9m13sh.jpg",
+        "../photos/shop/wms9m02x9-2-ms9m1xqd.jpg",
+        "../photos/shop/wms9m02x9-3-ms9m290q.jpg",
+        "../photos/shop/wms9m02x9-4-ms9m2eov.jpg"
+      ],
+      "prices": {
+        "postcard": 1300,
+        "a5": 3300,
+        "a4": 12800,
+        "a3": 28000,
+        "a2": 55000,
+        "a1": null
+      }
     }
   ]
 };
