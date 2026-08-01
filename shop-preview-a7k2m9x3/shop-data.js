@@ -358,6 +358,30 @@ window.SHOP_DATA = {
         "a2": 55000,
         "a1": null
       }
+    },
+    {
+      "id": "wms9mbjpg",
+      "title": "冷美。",
+      "type": "photo",
+      "kind": "print",
+      "place": "Tokyo",
+      "year": "2024",
+      "status": "public",
+      "desc": "暑い日でも、冷たい風の吹く日でも。\n冷たいアイスはそのときに合った美しいテイストで魅せてくれる。\n\n愛しい人とのひとときに、甘くて冷たいチョコレートのパフェをいただきました。\n\nふたりの時間のようにゆっくりと溶けだす甘いチョコアイスがとても美しく。。\nおもわずその溶ける姿にカメラを向けた１枚です。",
+      "images": [
+        "../photos/shop/wms9mbjpg-main-ms9mce9c.jpg",
+        "../photos/shop/wms9mbjpg-2-ms9mcqz7.jpg",
+        "../photos/shop/wms9mbjpg-3-ms9mcycy.jpg",
+        "../photos/shop/wms9mbjpg-4-ms9md689.jpg"
+      ],
+      "prices": {
+        "postcard": 1300,
+        "a5": 3300,
+        "a4": 12800,
+        "a3": 28000,
+        "a2": 55000,
+        "a1": 88000
+      }
     }
   ]
 };
