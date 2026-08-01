@@ -409,23 +409,23 @@ window.SHOP_DATA = {
       }
     },
     {
-      "id": "wms9tn3b1",
-      "title": "新しい作品",
-      "type": "photo",
+      "id": "wms9ttqnv",
+      "title": "time melting.",
+      "type": "oil",
       "kind": "print",
       "place": "",
-      "year": "2026",
+      "year": "",
       "status": "public",
-      "desc": "",
+      "desc": "美しいものを目の当たりにしたとき、つい時が止まったように見惚れてしまうときがあります。\n\n私がこのパフェに出会ったとき、そのあまりの美しさにしばし眺めていました。\nそうすると上からだんだんと溶けだし、ゆっくりとグラスをつたいお皿にいたるまでアイスが流れたんです。\n\nそれを見た瞬間、そこに”色気”を感じました。\n\n美しくあるものが時間とともにくずれ落ちる姿。\nその儚さにこそまた美しさがあるのだと感じたのです。",
       "images": [
-        "../photos/shop/wms9tn3b1-main-ms9tr7n3.jpg"
+        "../photos/shop/wms9ttqnv-main-ms9ttzu1.jpg"
       ],
       "prices": {
         "postcard": 1800,
-        "a5": 3500,
-        "a4": 18500,
-        "a3": 36000,
-        "a2": 63000,
+        "a5": 5500,
+        "a4": 15000,
+        "a3": 35000,
+        "a2": 58000,
         "a1": 88000
       }
     }
