@@ -382,6 +382,31 @@ window.SHOP_DATA = {
         "a2": 55000,
         "a1": 88000
       }
+    },
+    {
+      "id": "wms9mk4zr",
+      "title": "summer pink.",
+      "type": "photo",
+      "kind": "print",
+      "place": "Tokyo",
+      "year": "",
+      "status": "public",
+      "desc": "街中でふと見かけた、美しいひと。\nその立ち姿だけで、まるで世界が花に包まれたように煌めきだす。\n\n綺麗なスイーツに出会ったときもそう。\nパティシエの心が見えるそのアートは、空気をかえる。\nそしてそのスイーツに出会った人の心をつかんで離さない。\n\n出逢えただけで、とても幸せですね。",
+      "images": [
+        "../photos/shop/wms9mk4zr-main-ms9mku24.jpg",
+        "../photos/shop/wms9mk4zr-2-ms9mlcd0.jpg",
+        "../photos/shop/wms9mk4zr-3-ms9mll06.jpg",
+        "../photos/shop/wms9mk4zr-4-ms9mlqqp.jpg",
+        "../photos/shop/wms9mk4zr-5-ms9mlufu.jpg"
+      ],
+      "prices": {
+        "postcard": 1500,
+        "a5": 5500,
+        "a4": 13800,
+        "a3": 35000,
+        "a2": 58000,
+        "a1": null
+      }
     }
   ]
 };
