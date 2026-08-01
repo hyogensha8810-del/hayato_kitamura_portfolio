@@ -407,6 +407,27 @@ window.SHOP_DATA = {
         "a2": 58000,
         "a1": null
       }
+    },
+    {
+      "id": "wms9tn3b1",
+      "title": "新しい作品",
+      "type": "photo",
+      "kind": "print",
+      "place": "",
+      "year": "2026",
+      "status": "public",
+      "desc": "",
+      "images": [
+        "../photos/shop/wms9tn3b1-main-ms9tr7n3.jpg"
+      ],
+      "prices": {
+        "postcard": 1800,
+        "a5": 3500,
+        "a4": 18500,
+        "a3": 36000,
+        "a2": 63000,
+        "a1": 88000
+      }
     }
   ]
 };
