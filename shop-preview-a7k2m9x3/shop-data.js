@@ -491,6 +491,30 @@ window.SHOP_DATA = {
         "a2": 58000,
         "a1": 88000
       }
+    },
+    {
+      "id": "wms9vi47n",
+      "title": "おやつの時間。",
+      "type": "photo",
+      "kind": "print",
+      "place": "",
+      "year": "",
+      "status": "public",
+      "desc": "幼いころから「おやつの時間」が大好きでした。\nたまに買ってきてもらうドーナツは何だか特別な感じがしてワクワクしたものです。\n\n大人になった今でもたまに美味しいドーナツがある日はごきげんに。\nコーヒー片手にワクワクした気持ちで午後のおやつの時間を迎えます。\n\nそんなワクワクした気持ちで撮った１枚。",
+      "images": [
+        "../photos/shop/wms9vi47n-main-ms9xpedu.jpg",
+        "../photos/shop/wms9vi47n-2-ms9xsa2m.jpg",
+        "../photos/shop/wms9vi47n-3-ms9xsmaw.jpg",
+        "../photos/shop/wms9vi47n-4-ms9xsv8b.jpg"
+      ],
+      "prices": {
+        "postcard": 1800,
+        "a5": 4500,
+        "a4": 7700,
+        "a3": 19800,
+        "a2": 28000,
+        "a1": 55000
+      }
     }
   ]
 };
