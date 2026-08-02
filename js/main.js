@@ -34,8 +34,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  /* ---- 写真グリッド ---- */
   function buildGrid(container, list) {
-    if (!container || !list) return;
+    if (!container) return;
+    container.innerHTML = '';
+    if (!list || !list.length) return;
     list.forEach(p => {
       const fig = document.createElement('figure');
       fig.className = 'ph';
@@ -43,15 +46,73 @@ document.addEventListener('DOMContentLoaded', () => {
       img.src = p.src;
       img.alt = p.alt || '';
       img.loading = 'lazy';
-      img.addEventListener('load', () => img.classList.add('loaded'));
+      img.addEventListener('load', () => {
+        // 写真そのものの縦横比をタイルに反映（縦・横・正方形がバラバラに並ぶ）
+        if (img.naturalWidth && img.naturalHeight) {
+          fig.style.setProperty('--ar', img.naturalWidth + ' / ' + img.naturalHeight);
+        }
+        img.classList.add('loaded');
+      });
       fig.appendChild(img);
       fig.addEventListener('click', () => openLightbox(p.src, p.alt));
       container.appendChild(fig);
     });
   }
 
+  /* ---- Works のタブ切り替え（ALL / GOURMET / SWEETS）---- */
   if (typeof SITE_PHOTOS !== 'undefined') {
-    buildGrid(document.getElementById('masonry'), SITE_PHOTOS.gallery);
+    const auto = (typeof SITE_PHOTOS_AUTO !== 'undefined') ? SITE_PHOTOS_AUTO : {};
+    const gourmet = SITE_PHOTOS.gourmet || auto.gourmet || [];
+    const sweets  = SITE_PHOTOS.sweets  || auto.sweets  || [];
+    const gallery = SITE_PHOTOS.gallery || [];
+
+    const SETS = {
+      all:     [].concat(gourmet, sweets, gallery),
+      gourmet: gourmet,
+      sweets:  sweets
+    };
+
+    const masonry = document.getElementById('masonry');
+    const tabsBox = document.getElementById('galleryTabs');
+
+    if (masonry) {
+      // グルメ・スイーツのどちらにも写真が無いうちはタブを出さない
+      const useTabs = gourmet.length > 0 || sweets.length > 0;
+
+      const show = key => {
+        buildGrid(masonry, SETS[key] && SETS[key].length ? SETS[key] : SETS.all);
+        if (tabsBox) {
+          tabsBox.querySelectorAll('.gallery-tab').forEach(b => {
+            b.classList.toggle('active', b.dataset.cat === key);
+          });
+        }
+      };
+
+      if (useTabs && tabsBox) {
+        const defs = [
+          { cat: 'all',     en: 'ALL',     jp: 'すべて',   on: true },
+          { cat: 'gourmet', en: 'GOURMET', jp: 'グルメ',   on: gourmet.length > 0 },
+          { cat: 'sweets',  en: 'SWEETS',  jp: 'スイーツ', on: sweets.length > 0 }
+        ];
+        defs.filter(d => d.on).forEach(d => {
+          const b = document.createElement('button');
+          b.className = 'gallery-tab';
+          b.type = 'button';
+          b.dataset.cat = d.cat;
+          b.innerHTML = d.en + '<span class="tab-jp">' + d.jp + '</span>';
+          b.addEventListener('click', () => {
+            history.replaceState(null, '', d.cat === 'all' ? location.pathname : '#' + d.cat);
+            show(d.cat);
+          });
+          tabsBox.appendChild(b);
+        });
+        tabsBox.hidden = false;
+      }
+
+      const fromHash = location.hash.replace('#', '');
+      show(SETS[fromHash] && SETS[fromHash].length ? fromHash : 'all');
+    }
+
     buildGrid(document.getElementById('masonryWide'), SITE_PHOTOS.galleryWide);
   }
 
