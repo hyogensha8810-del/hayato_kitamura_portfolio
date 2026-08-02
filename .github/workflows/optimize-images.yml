@@ -1,8 +1,10 @@
 name: Optimize images
 
 # photos/ 以下に画像が追加・更新されると自動でウェブ用サイズに縮小・圧縮します。
-# hero=長辺2400px / gallery=長辺1800px / profile=1200px（超えた分だけ縮小、小さい写真はそのまま）
-# 縮小後の画像はこのワークフローが自動でコミットしてリポジトリに反映します。
+# hero=長辺2400px / gallery・gourmet・sweets=長辺1800px / profile=1200px
+# （超えた分だけ縮小、小さい写真はそのまま）
+# あわせて photos-gen.js（GOURMET / SWEETS タブの写真リスト）を自動生成します。
+# 縮小後の画像とphotos-gen.jsはこのワークフローが自動でコミットして反映します。
 # ※ GITHUB_TOKEN によるコミットは新たなワークフローを起動しないため、無限ループにはなりません。
 
 on:
@@ -48,6 +50,7 @@ jobs:
 
           resize_dir () {
             local dir="$1"; local max="$2"; local q="$3"
+            [ -d "$dir" ] || return 0
             for f in "$dir"/*.jpg "$dir"/*.jpeg "$dir"/*.png; do
               resize_one "$f" "$max" "$q"
             done
@@ -55,10 +58,15 @@ jobs:
 
           resize_dir photos/hero 2400 82
           resize_dir photos/gallery 1800 82
+          resize_dir photos/gourmet 1800 82
+          resize_dir photos/sweets 1800 82
           resize_one photos/profile.jpg 1200 85
+
+      - name: Generate photos-gen.js
+        run: python3 .github/scripts/gen-photos.py
 
       - name: Commit optimized images
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: auto-optimize images [skip ci]"
-          file_pattern: 'photos/**'
+          commit_message: "chore: auto-optimize images & update photo list [skip ci]"
+          file_pattern: 'photos/** photos-gen.js'
