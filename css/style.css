@@ -170,9 +170,11 @@ a { color: inherit; text-decoration: none; }
   cursor: zoom-in;
   position: relative;
   background: var(--bg-soft);
-  /* 高さをあらかじめ確保しておくことで、画像の読み込み完了時に
-     グリッドがガクガク動く（レイアウトシフト）のを防ぐ */
-  aspect-ratio: 4 / 5;
+  /* 読み込み前は 4:5 で場所を確保し、読み込み後に
+     写真そのものの縦横比（--ar）へ切り替える。
+     これで縦・横・正方形がバラバラに並ぶマソナリーになる。 */
+  aspect-ratio: var(--ar, 4 / 5);
+  transition: aspect-ratio .3s ease;
 }
 .masonry .ph img {
   position: absolute;
@@ -211,6 +213,47 @@ a { color: inherit; text-decoration: none; }
 }
 .masonry-wide .ph img.loaded { opacity: 1; }
 .masonry-wide .ph:hover img { transform: scale(1.04); }
+
+/* ---------- Works のタブ（ALL / GOURMET / SWEETS） ---------- */
+.gallery-tabs[hidden] { display: none; }
+.gallery-tabs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 34px;
+}
+.gallery-tab {
+  background: none;
+  border: 1px solid rgba(255,255,255,.16);
+  color: var(--text);
+  font-family: 'Cormorant Garamond', 'Noto Serif JP', serif;
+  font-size: .82rem;
+  letter-spacing: .18em;
+  padding: 11px 26px 9px;
+  cursor: pointer;
+  opacity: .6;
+  transition: opacity .3s ease, border-color .3s ease, background .3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.5;
+}
+.gallery-tab:hover { opacity: .9; }
+.gallery-tab.active {
+  opacity: 1;
+  border-color: rgba(255,255,255,.55);
+  background: rgba(255,255,255,.05);
+}
+.gallery-tab .tab-jp {
+  font-size: .6rem;
+  letter-spacing: .1em;
+  opacity: .55;
+  margin-top: 2px;
+}
+@media (max-width: 640px) {
+  .gallery-tab { padding: 9px 18px 8px; font-size: .74rem; }
+}
 
 /* ---------- ライトボックス ---------- */
 .lightbox[hidden] { display: none; }
