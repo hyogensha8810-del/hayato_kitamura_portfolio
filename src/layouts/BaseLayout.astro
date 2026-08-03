@@ -1,0 +1,141 @@
+---
+import '../styles/global.css';
+import { SITE, CATEGORIES } from '../data/site';
+
+interface Props {
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+const { title, description, noindex = false } = Astro.props;
+
+// タブに表示される文字列。覗き見されても内容が特定されない語に保つこと。
+const pageTitle = title ? `${title} | ${SITE.name}` : `${SITE.name} — ${SITE.tagline}`;
+const desc = description ?? SITE.description;
+const canonical = new URL(Astro.url.pathname, SITE.url).href;
+const year = new Date().getFullYear();
+---
+<!doctype html>
+<html lang={SITE.lang}>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{pageTitle}</title>
+  <meta name="description" content={desc} />
+  <link rel="canonical" href={canonical} />
+  {noindex && <meta name="robots" content="noindex, nofollow" />}
+  <meta name="rating" content="adult" />
+  <meta name="RATING" content="RTA-5042-1996-1400-1577-RTA" />
+
+  <!-- OGP: SNS共有時に露骨にならない意匠を使う -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content={SITE.name} />
+  <meta property="og:title" content={pageTitle} />
+  <meta property="og:description" content={desc} />
+  <meta property="og:url" content={canonical} />
+  <meta property="og:image" content={new URL('/ogp.png', SITE.url).href} />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <link rel="sitemap" href="/sitemap.xml" />
+
+  <!-- 編集モードの切り替え。?edit=on で有効、?edit=off で無効。
+       この端末のブラウザにだけ記録されるので、読者には一切影響しない。 -->
+  <script is:inline>
+    (function () {
+      try {
+        var q = new URLSearchParams(location.search).get('edit');
+        if (q === 'on') localStorage.setItem('honoka-edit', 'on');
+        if (q === 'off') localStorage.removeItem('honoka-edit');
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- テーマ初期化：描画前に実行して切り替えのちらつきを防ぐ -->
+  <script is:inline>
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      } catch (e) {}
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- ========== 年齢確認ゲート ==========
+       未確認の状態を初期値にして「閉じる側に倒す」。
+       直後のインラインscriptで、確認済みなら描画前に隠す。 -->
+  <div id="age-gate">
+    <div class="gate">
+      <h1>はじめに</h1>
+      <p>
+        このサイトには、成人向けの商品に関する情報が含まれます。<br />
+        18歳未満の方はご覧いただけません。
+      </p>
+      <p style="font-size:.78rem;margin-top:1.2rem;">
+        人目が気になる場所でご覧の場合は、<br />プライベートブラウジングのご利用をおすすめします。
+      </p>
+      <div class="gate__actions">
+        <button class="btn" id="age-yes" type="button">18歳以上です</button>
+        <a class="btn btn--ghost" href="https://www.google.com/">とじる</a>
+      </div>
+    </div>
+  </div>
+  <script is:inline>
+    (function () {
+      var g = document.getElementById('age-gate');
+      try {
+        if (localStorage.getItem('age-ok') === '1') { g.hidden = true; }
+      } catch (e) {}
+      document.getElementById('age-yes').addEventListener('click', function () {
+        try { localStorage.setItem('age-ok', '1'); } catch (e) {}
+        g.hidden = true;
+      });
+    })();
+  </script>
+
+  <header class="site-head">
+    <div class="site-head__in">
+      <a class="site-title" href="/">ほのか<span>ログ</span></a>
+      <nav class="nav">
+        {Object.values(CATEGORIES).map((c) => (
+          <a href={`/category/${c.slug}`}>{c.label}</a>
+        ))}
+        <button class="theme-btn" id="theme-btn" type="button" aria-label="表示テーマを切り替え">◐</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <slot />
+  </main>
+
+  <footer class="site-foot">
+    <div class="site-foot__in">
+      <nav class="foot-nav">
+        <a href="/about">このサイトについて</a>
+        <a href="/about-ads">広告について</a>
+        <a href="/privacy">プライバシーポリシー</a>
+        <a href="/disclaimer">免責事項</a>
+        <a href="/contact">お問い合わせ</a>
+      </nav>
+      <p class="foot-note">
+        当サイトはアフィリエイト広告（PR）を利用しています。<br />
+        18歳未満の方の閲覧はご遠慮ください。
+      </p>
+      <p class="foot-note">&copy; {year} {SITE.name}</p>
+    </div>
+  </footer>
+
+  <script is:inline>
+    document.getElementById('theme-btn').addEventListener('click', function () {
+      var d = document.documentElement;
+      var next = d.dataset.theme === 'dark' ? 'light' : 'dark';
+      d.dataset.theme = next;
+      try { localStorage.setItem('theme', next); } catch (e) {}
+    });
+  </script>
+</body>
+</html>

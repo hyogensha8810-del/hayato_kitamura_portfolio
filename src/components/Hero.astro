@@ -1,0 +1,71 @@
+---
+/**
+ * ふんわりしたヘッダーイラスト
+ * 写真は使わない（権利・トーンの両面で扱いが難しいため）。
+ * やわらかい有機的な形だけで構成し、人前で開いても平気な絵に保つ。
+ */
+interface Props {
+  tone?: 'cream' | 'rose' | 'sky' | 'sand' | 'sage';
+  motif?: 'bloom' | 'circles' | 'waves' | 'leaves';
+  compact?: boolean;
+}
+const { tone = 'cream', motif = 'bloom', compact = false } = Astro.props;
+
+const PALETTE = {
+  cream: { bg: '#F7EFE6', a: '#EBD6C6', b: '#DFC3AE', c: '#F2E2D2', d: '#C89C84' },
+  rose:  { bg: '#F8EDEC', a: '#EFD3D2', b: '#E4B9B8', c: '#F6E0DF', d: '#C68A89' },
+  sky:   { bg: '#EDF1F4', a: '#D3DDE5', b: '#B8C8D4', c: '#E1E8ED', d: '#8AA0B0' },
+  sand:  { bg: '#F6F1E4', a: '#E6DCC4', b: '#D6C8A6', c: '#EFE7D5', d: '#AD9C74' },
+  sage:  { bg: '#EEF2EA', a: '#D8E1D2', b: '#C0CEB8', c: '#E4EADF', d: '#8CA085' },
+} as const;
+const p = PALETTE[tone];
+---
+<div class:list={['hero', compact && 'hero--compact']} aria-hidden="true">
+  <svg viewBox="0 0 800 260" preserveAspectRatio="xMidYMid slice" role="presentation">
+    <rect width="800" height="260" fill={p.bg} />
+
+    {motif === 'bloom' && (
+      <g>
+        <path d="M120 260c-40-70 10-150 90-160 70-9 110 40 175 30 70-10 95-70 165-58 62 11 92 78 78 148 -6 30-20 40-40 40z" fill={p.c} opacity="0.9"/>
+        <ellipse cx="255" cy="150" rx="118" ry="86" fill={p.a} opacity="0.85"/>
+        <ellipse cx="360" cy="185" rx="86" ry="62" fill={p.b} opacity="0.55"/>
+        <circle cx="600" cy="112" r="52" fill={p.a} opacity="0.8"/>
+        <circle cx="662" cy="150" r="30" fill={p.b} opacity="0.6"/>
+        <circle cx="546" cy="70" r="12" fill={p.d} opacity="0.35"/>
+        <circle cx="700" cy="86" r="7" fill={p.d} opacity="0.3"/>
+        <circle cx="160" cy="72" r="9" fill={p.d} opacity="0.28"/>
+      </g>
+    )}
+
+    {motif === 'circles' && (
+      <g>
+        <circle cx="300" cy="150" r="104" fill={p.a} opacity="0.85"/>
+        <circle cx="420" cy="150" r="104" fill={p.b} opacity="0.5"/>
+        <circle cx="640" cy="196" r="66" fill={p.c}/>
+        <circle cx="150" cy="70" r="26" fill={p.b} opacity="0.5"/>
+        <circle cx="700" cy="72" r="11" fill={p.d} opacity="0.3"/>
+        <circle cx="80" cy="190" r="8" fill={p.d} opacity="0.28"/>
+      </g>
+    )}
+
+    {motif === 'waves' && (
+      <g>
+        <path d="M0 172c110-46 190 30 300-4s180-84 300-46 200 26 200 26v112H0z" fill={p.a} opacity="0.85"/>
+        <path d="M0 214c120-38 210 22 320-8s200-56 300-24 180 14 180 14v64H0z" fill={p.b} opacity="0.55"/>
+        <circle cx="188" cy="80" r="34" fill={p.c}/>
+        <circle cx="620" cy="66" r="16" fill={p.b} opacity="0.5"/>
+        <circle cx="460" cy="52" r="8" fill={p.d} opacity="0.3"/>
+      </g>
+    )}
+
+    {motif === 'leaves' && (
+      <g>
+        <path d="M210 240c-90-16-130-92-96-152 34-58 132-58 176-8 40 46 22 130-38 154z" fill={p.a} opacity="0.85"/>
+        <path d="M520 250c-70-30-78-118-20-160 56-42 140-8 154 56 12 60-42 122-100 110z" fill={p.b} opacity="0.5"/>
+        <circle cx="690" cy="120" r="44" fill={p.c}/>
+        <circle cx="96" cy="86" r="14" fill={p.d} opacity="0.3"/>
+        <circle cx="404" cy="66" r="9" fill={p.d} opacity="0.28"/>
+      </g>
+    )}
+  </svg>
+</div>

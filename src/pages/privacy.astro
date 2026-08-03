@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import { SITE } from '../data/site';
+---
+<BaseLayout title="プライバシーポリシー">
+  <section class="wrap" style="padding-top:2rem">
+    <Hero tone="sage" motif="circles" compact />
+    <h1>プライバシーポリシー</h1>
+
+    <h2>個人情報の取り扱い</h2>
+    <p>
+      当サイト（{SITE.name}）では、お問い合わせの際にお名前・メールアドレス等をお預かりすることがあります。
+      これらの情報は、お問い合わせへの回答および必要な連絡のためにのみ利用し、
+      ご本人の同意なく第三者に開示することはありません。
+    </p>
+
+    <h2>アクセス解析ツールについて</h2>
+    <p>
+      当サイトでは、サイトの利用状況を把握するためにGoogleアナリティクス（GA4）を利用しています。
+      Googleアナリティクスはデータの収集のためにCookieを使用します。
+      このデータは匿名で収集されており、個人を特定するものではありません。
+    </p>
+    <p>
+      収集を希望されない場合は、ブラウザの設定でCookieを無効にすることで拒否できます。
+      詳しくは<a href="https://policies.google.com/technologies/partner-sites" target="_blank" rel="noopener">Googleのポリシーと規約</a>をご確認ください。
+    </p>
+
+    <h2>アフィリエイトプログラムについて</h2>
+    <p>
+      当サイトはアフィリエイト広告（PR）を利用しています。
+      広告配信事業者がCookieを使用し、利用者の当サイトおよび他サイトへのアクセス情報をもとに
+      成果の計測を行うことがあります。この情報に氏名・住所・電話番号等は含まれません。
+    </p>
+    <p>詳しくは<a href="/about-ads">広告について</a>をご覧ください。</p>
+
+    <h2>年齢に関する制限</h2>
+    <p>
+      当サイトは成人向けの商品に関する情報を含むため、18歳未満の方の利用を想定していません。
+      初回アクセス時に年齢の確認を表示しています。
+    </p>
+
+    <h2>免責事項</h2>
+    <p>
+      当サイトの情報の正確性については<a href="/disclaimer">免責事項</a>をご確認ください。
+    </p>
+
+    <h2>プライバシーポリシーの変更</h2>
+    <p>
+      本ポリシーの内容は、法令の改正等により予告なく変更されることがあります。
+      変更後のプライバシーポリシーは、当ページに掲載した時点から効力を生じるものとします。
+    </p>
+
+    <p class="lead" style="margin-top:2.5rem">制定日：2026年8月3日</p>
+  </section>
+</BaseLayout>

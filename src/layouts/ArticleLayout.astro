@@ -1,0 +1,98 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import { getAuthor } from '../data/authors';
+import { CATEGORIES } from '../data/site';
+
+const { frontmatter } = Astro.props;
+const {
+  title,
+  description = '',
+  category = 'buying',
+  author = 'editors',
+  date,
+  updated,
+  guide = [],          // 柱Cなどへの導線リンク [{ href, label }]
+} = frontmatter ?? {};
+
+const a = getAuthor(author);
+const cat = CATEGORIES[category as keyof typeof CATEGORIES] ?? CATEGORIES.buying;
+
+// カテゴリごとの絵柄
+const LOOK: Record<string, { tone: any; motif: any }> = {
+  worry:  { tone: 'sky',  motif: 'waves' },
+  buying: { tone: 'rose', motif: 'circles' },
+  couple: { tone: 'sage', motif: 'leaves' },
+};
+const look = LOOK[category] ?? LOOK.buying;
+
+// 編集ボタン用。URLの末尾から記事のslugを取り出す。
+const slug = Astro.url.pathname.replace(/\/$/, '').split('/').pop() ?? '';
+
+const fmt = (d?: string) =>
+  d ? new Date(d).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+---
+<BaseLayout title={title} description={description}>
+  <article class="wrap">
+
+    <div style="padding-top:2rem">
+      <Hero tone={look.tone} motif={look.motif} />
+    </div>
+
+    <header class="article-head" style="padding-top:0">
+      <div class="meta" style="margin-bottom:.9rem">
+        <a class="pill" href={`/category/${cat.slug}`} style="text-decoration:none">{cat.label}</a>
+      </div>
+      <h1>{title}</h1>
+      <div class="meta">
+        <span>文／{a.name}</span>
+        {date && <span>公開 {fmt(date)}</span>}
+        {updated && <span>更新 {fmt(updated)}</span>}
+      </div>
+    </header>
+
+    {/* ステマ規制（景表法・2023年10月施行）対応。
+        「アフィリエイト」の語だけでは不十分とされる場合があるため
+        「広告」「PR」を必ず併記する。全記事に自動挿入。 */}
+    <p class="ad-notice">
+      本記事にはアフィリエイト広告（PR）を含みます。
+      商品リンクを経由して購入された場合、当サイトに報酬が発生することがあります。
+      <a href="/about-ads">詳しくはこちら</a>
+    </p>
+
+    <div class="prose">
+      <slot />
+    </div>
+
+    {guide.length > 0 && (
+      <aside class="guide">
+        <p class="guide__label">買う前に、こちらも</p>
+        <ul>
+          {guide.map((g: { href: string; label: string }) => (
+            <li><a href={g.href}>{g.label}</a></li>
+          ))}
+        </ul>
+      </aside>
+    )}
+
+    <div class="byline">
+      <div class="byline__avatar">{a.name.slice(0, 1)}</div>
+      <div>
+        <p class="byline__name">{a.name}</p>
+        <p class="byline__bio">{a.bio}</p>
+      </div>
+    </div>
+
+  </article>
+
+  <a class="edit-fab" id="edit-fab" href={`/editor?a=${slug}`}>この記事を編集</a>
+  <script is:inline>
+    (function () {
+      try {
+        if (localStorage.getItem('honoka-edit') === 'on') {
+          document.getElementById('edit-fab').dataset.on = '1';
+        }
+      } catch (e) {}
+    })();
+  </script>
+</BaseLayout>

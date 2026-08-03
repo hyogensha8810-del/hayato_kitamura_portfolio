@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import { SITE } from '../data/site';
+import { AUTHORS } from '../data/authors';
+---
+<BaseLayout title="このサイトについて">
+  <section class="wrap" style="padding-top:2rem">
+    <Hero tone="sand" motif="leaves" compact />
+    <h1>このサイトについて</h1>
+
+    <p>
+      ほのかログは、人には少し聞きにくい小さな悩みについて、
+      調べたことを整理して置いておく場所です。
+    </p>
+    <p>
+      検索しても、宣伝ばかりで知りたいことが出てこない。
+      買いたいけれど、その前の不安が消えない。
+      そういう場面で役に立つことを目指しています。
+    </p>
+
+    <h2>運営について</h2>
+    <p>
+      ほのかログは<strong>複数名の編集チーム</strong>で運営しています。
+      記事にはそれぞれ執筆者名を記載しています。
+    </p>
+
+    <div style="display:grid;gap:1rem;margin:2rem 0">
+      {Object.values(AUTHORS).filter(a => a.id !== 'editors').map((a) => (
+        <div class="byline" style="border-top:0;margin-top:0;padding-top:0">
+          <div class="byline__avatar">{a.name.slice(0,1)}</div>
+          <div>
+            <p class="byline__name">{a.name}</p>
+            <p class="byline__bio">{a.bio}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <h2>記事づくりで守っていること</h2>
+    <ul>
+      <li><strong>実際に使っていない商品について、使ったかのようには書きません。</strong>公開されているレビューや仕様を調べた場合は、その旨がわかるように書きます。</li>
+      <li>良いところだけでなく、<strong>気になった点や向かない場合も書きます。</strong></li>
+      <li>価格や仕様は変わるため、<strong>調べた時点を明記</strong>します。</li>
+      <li>医療的な判断はしません。体の不調が続く場合は医療機関にご相談ください。</li>
+      <li>18歳未満の方に向けた内容は扱いません。</li>
+    </ul>
+
+    <h2>ご連絡</h2>
+    <p>
+      記事内容の誤り、情報の更新、その他のお問い合わせは
+      <a href="/contact">お問い合わせページ</a>からお願いします。
+    </p>
+
+    <p class="lead" style="margin-top:2.5rem">
+      当サイトはアフィリエイト広告（PR）を利用しています。詳しくは
+      <a href="/about-ads">広告について</a>をご覧ください。
+    </p>
+  </section>
+</BaseLayout>

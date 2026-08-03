@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Hero from '../../components/Hero.astro';
+import { CATEGORIES } from '../../data/site';
+import { getAuthor } from '../../data/authors';
+
+export function getStaticPaths() {
+  return Object.values(CATEGORIES).map((c) => ({
+    params: { category: c.slug },
+    props: { label: c.label, lead: c.lead },
+  }));
+}
+
+const LOOK: Record<string, { tone: any; motif: any }> = {
+  worry:  { tone: 'sky',  motif: 'waves' },
+  buying: { tone: 'rose', motif: 'circles' },
+  couple: { tone: 'sage', motif: 'leaves' },
+};
+
+const { category } = Astro.params;
+const { label, lead } = Astro.props;
+const look = LOOK[category as string] ?? LOOK.buying;
+
+const mods = import.meta.glob('../articles/*.md', { eager: true }) as Record<string, any>;
+const posts = Object.values(mods)
+  .filter((m) => !m.frontmatter?.draft && m.frontmatter?.category === category)
+  .sort((a, b) => new Date(b.frontmatter?.date ?? 0).getTime() - new Date(a.frontmatter?.date ?? 0).getTime());
+---
+<BaseLayout title={label}>
+  <section class="wrap wrap--wide" style="padding-top:2rem">
+    <Hero tone={look.tone} motif={look.motif} />
+    <h1>{label}</h1>
+    <p class="section-lead">{lead}</p>
+    {posts.length === 0 ? (
+      <div class="empty">この分類の記事は準備中です。</div>
+    ) : (
+      <div class="blocks">
+        {posts.map((p) => (
+          <a class="block" href={p.url}>
+            <div class="block__art"><Hero tone={look.tone} motif={look.motif} compact /></div>
+            <div class="block__body">
+              <h3>{p.frontmatter.title}</h3>
+              <p>{p.frontmatter.description}</p>
+              <p class="block__by">文／{getAuthor(p.frontmatter.author).name}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+</BaseLayout>

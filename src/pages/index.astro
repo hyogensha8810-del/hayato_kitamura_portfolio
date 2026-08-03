@@ -1,0 +1,102 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import { SITE, CATEGORIES } from '../data/site';
+import { getAuthor } from '../data/authors';
+
+const mods = import.meta.glob('./articles/*.md', { eager: true }) as Record<string, any>;
+const posts = Object.values(mods)
+  .filter((m: any) => !m.frontmatter?.draft)
+  .sort((a: any, b: any) =>
+    new Date(b.frontmatter?.date ?? 0).getTime() - new Date(a.frontmatter?.date ?? 0).getTime());
+
+// カテゴリごとの見た目（ブロックの小さな絵に使う）
+const LOOK: Record<string, { tone: any; motif: any }> = {
+  worry:  { tone: 'sky',  motif: 'waves' },
+  buying: { tone: 'rose', motif: 'circles' },
+  couple: { tone: 'sage', motif: 'leaves' },
+};
+---
+<BaseLayout>
+  <section class="wrap wrap--wide" style="padding-top:2rem">
+    <Hero tone="cream" motif="bloom" />
+
+    <div class="intro">
+      <h1>人には聞きにくいことを、<br />しずかに調べる場所です。</h1>
+
+      <p>
+        からだのこと、パートナーとのこと、買うときに気になること。
+        検索してみても、宣伝ばかりで知りたいことにたどり着けない。
+        誰かに聞くのは気が引ける。——そういう場面のための場所です。
+      </p>
+
+      <p class="muted">
+        ほのかログでは、<strong>性にまつわる悩みや、ラブグッズの選び方・買い方</strong>を扱います。
+        センシティブな話題ですが、必要としている人がいるので、
+        できるだけ落ち着いた言葉で、正直に書いていきます。
+      </p>
+    </div>
+
+    <div class="note-soft">
+      <p>
+        <strong>書くときに決めていること</strong>
+      </p>
+      <p>
+        使っていない商品を「使ってみた」とは書きません。
+        公開されている情報を調べてまとめた場合は、そうと分かるように書きます。
+      </p>
+      <p>
+        良いところだけでなく、気になった点や、向かない場合のことも書きます。
+        価格や仕様は変わるので、調べた時点を必ず残しています。
+      </p>
+      <p>
+        医療的な判断はしません。からだの不調が続くときは、
+        我慢せず医療機関に相談してください。
+      </p>
+      <p class="muted">
+        なお、当サイトはアフィリエイト広告（PR）を利用しています。
+        <a href="/about-ads">広告について</a> ／ <a href="/about">このサイトについて</a>
+      </p>
+    </div>
+
+    <div class="cat-chips">
+      {Object.values(CATEGORIES).map((c) => (
+        <a href={`/category/${c.slug}`}>{c.label}</a>
+      ))}
+    </div>
+
+    <h2 class="section-title">記事</h2>
+    <p class="section-lead">新しいものから並べています。</p>
+
+    {posts.length === 0 ? (
+      <div class="empty">
+        いま準備しています。<br />もう少しお待ちください。
+      </div>
+    ) : (
+      <div class="blocks">
+        {posts.map((p: any) => {
+          const f = p.frontmatter;
+          const c = CATEGORIES[f.category as keyof typeof CATEGORIES] ?? CATEGORIES.buying;
+          const look = LOOK[f.category] ?? LOOK.buying;
+          return (
+            <a class="block" href={p.url}>
+              <div class="block__art">
+                <Hero tone={look.tone} motif={look.motif} compact />
+              </div>
+              <div class="block__body">
+                <span class="block__cat">{c.label}</span>
+                <h3>{f.title}</h3>
+                <p>{f.description}</p>
+                <p class="block__by">文／{getAuthor(f.author).name}</p>
+              </div>
+            </a>
+          );
+        })}
+      </div>
+    )}
+
+    <p class="section-lead" style="margin-top:2.4rem">
+      18歳未満の方の閲覧はご遠慮ください。
+    </p>
+  </section>
+</BaseLayout>

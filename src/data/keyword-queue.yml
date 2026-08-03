@@ -1,0 +1,32 @@
+- slug: konbini-uketori
+  title: コンビニ受取に対応しているショップと、実際の受け取りの流れ
+  description: 店員に中身は分かるのか、名前は呼ばれるのか。コンビニ受取の実際を調べました。
+  keyword: アダルトグッズ コンビニ受取
+  category: buying
+  author: ryo
+  intent: 家族に知られたくないので、自宅以外で受け取りたいと思っている
+  products:
+  - shop_nls
+  done: true
+  generated: '2026-08-03'
+- slug: shiharai-hoho-hikaku
+  title: 支払い方法ごとの「記録の残り方」を比べた
+  description: カード・コンビニ払い・電子マネー・代引き。どこに何が残るのかを整理しました。
+  keyword: アダルトグッズ 支払い方法
+  category: buying
+  author: ryo
+  intent: カードの明細に残したくないので、別の支払い方法を探している
+  products:
+  - shop_nls
+  - shop_fanza_tsuhan
+  done: true
+  generated: '2026-08-03'
+- slug: josei-hajimete-erabikata
+  title: はじめて選ぶときに、見ておきたいところ
+  description: 種類が多すぎて分からない。何を基準に選べばいいのかを整理しました。
+  keyword: ラブグッズ 女性 初心者 選び方
+  category: buying
+  author: akari
+  intent: 興味はあるが、何から見ればいいのか分からず止まっている
+  products: []
+  done: false

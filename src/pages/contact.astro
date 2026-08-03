@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import { SITE } from '../data/site';
+---
+<BaseLayout title="お問い合わせ">
+  <section class="wrap" style="padding-top:2rem">
+    <Hero tone="rose" motif="bloom" compact />
+    <h1>お問い合わせ</h1>
+
+    <p>
+      記事内容の誤りのご指摘、情報の更新のお知らせ、
+      掲載に関するご相談などは、下記のメールアドレスへお願いします。
+    </p>
+
+    <p style="font-size:1.05rem;margin:2rem 0">
+      <span class="pill" style="font-size:.95rem;padding:.5rem 1.1rem">{SITE.contactEmail}</span>
+    </p>
+
+    <p class="lead">
+      内容によっては、お返事にお時間をいただく場合や、
+      お返事を差し控える場合がございます。あらかじめご了承ください。
+    </p>
+
+    <h2>いただくことの多いご質問</h2>
+
+    <h3>記事の情報が古いようです</h3>
+    <p>
+      価格や仕様は変わります。お気づきの点があればご連絡いただけると助かります。
+      毎月、リンクと商品情報の確認を行っていますが、見落としがあります。
+    </p>
+
+    <h3>商品を紹介してほしい</h3>
+    <p>
+      掲載のご相談は承っております。ただし、報酬の有無にかかわらず
+      記事の評価を変えることはいたしかねます。その点をご了承いただける場合のみ、
+      ご連絡ください。
+    </p>
+
+    <h3>購入した商品について問い合わせたい</h3>
+    <p>
+      当サイトは販売の当事者ではないため、対応いたしかねます。
+      恐れ入りますが、購入された販売元へ直接お問い合わせください。
+    </p>
+  </section>
+</BaseLayout>

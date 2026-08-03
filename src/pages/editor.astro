@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../data/site';
+
+// 記事の元テキストをビルド時に埋め込む（サーバー側の仕組みが不要になる）
+const raws = import.meta.glob('./articles/*.md', { query: '?raw', import: 'default', eager: true }) as Record<string, string>;
+const sources: Record<string, string> = {};
+for (const [path, text] of Object.entries(raws)) {
+  const slug = path.split('/').pop()!.replace(/\.md$/, '');
+  sources[slug] = text;
+}
+const slugs = Object.keys(sources).sort();
+---
+<BaseLayout title="編集" noindex>
+  <section class="wrap wrap--wide ed" style="padding-top:1.4rem">
+
+    <div class="ed__head">
+      <div>
+        <h1 class="ed__title">編集</h1>
+        <p class="ed__sub" id="ed-file">記事を選んでください</p>
+      </div>
+      <select id="ed-select" class="ed__select">
+        <option value="">— 記事を選ぶ —</option>
+        {slugs.map((s) => <option value={s}>{s}</option>)}
+      </select>
+    </div>
+
+    <div class="ed__bar" id="ed-bar">
+      <div class="ed__grp">
+        <button type="button" data-cmd="bold" title="太字"><b>B</b></button>
+        <button type="button" data-cmd="underline" title="下線"><u>U</u></button>
+        <button type="button" data-cmd="h2" title="見出し（大）">見出し</button>
+        <button type="button" data-cmd="h3" title="見出し（小）">小見出し</button>
+        <button type="button" data-cmd="link" title="リンク">リンク</button>
+      </div>
+      <div class="ed__grp">
+        <button type="button" data-cmd="ul" title="箇条書き">・箇条書き</button>
+        <button type="button" data-cmd="ol" title="番号つき">1. 番号</button>
+        <button type="button" data-cmd="quote" title="引用">引用</button>
+        <button type="button" data-cmd="table" title="表">表</button>
+        <button type="button" data-cmd="hr" title="区切り線">区切り</button>
+      </div>
+      <div class="ed__grp ed__grp--box">
+        <button type="button" data-cmd="box-point">ポイント枠</button>
+        <button type="button" data-cmd="box-caution">注意枠</button>
+        <button type="button" data-cmd="box-memo">メモ枠</button>
+        <button type="button" data-cmd="box-summary">まとめ枠</button>
+      </div>
+      <div class="ed__grp">
+        <button type="button" data-cmd="product" title="リンク台帳の商品を挿入">商品リンク</button>
+      </div>
+    </div>
+
+    <div class="ed__split">
+      <div class="ed__pane">
+        <p class="ed__label">本文（マークダウン）</p>
+        <textarea id="ed-src" spellcheck="false" placeholder="上の「記事を選ぶ」から選んでください"></textarea>
+      </div>
+      <div class="ed__pane">
+        <p class="ed__label">プレビュー</p>
+        <div id="ed-prev" class="prose ed__prev"></div>
+      </div>
+    </div>
+
+    <div class="ed__foot">
+      <button type="button" id="ed-copy" class="btn">本文をコピー</button>
+      <button type="button" id="ed-dl" class="btn btn--ghost">.mdで保存</button>
+      <a id="ed-gh" class="btn btn--ghost" href="#" target="_blank" rel="noopener">GitHubで開く</a>
+      <span class="ed__msg" id="ed-msg"></span>
+    </div>
+
+    <div class="box box--memo" style="margin-top:2.4rem">
+      <p class="box__title">保存のしかた</p>
+      <p>
+        ①「本文をコピー」→ ②「GitHubで開く」→ ③ 編集欄を全部消して貼り付け → ④ Commit changes。
+        数分でサイトに反映されます。
+      </p>
+      <p>
+        公開したいときは、いちばん上の <code>draft: true</code> の行を消してください。
+      </p>
+      <p style="font-size:.82rem;color:var(--text-muted)">
+        編集ボタンを消したいときは、どのページでも末尾に <code>?edit=off</code> を付けて開いてください。
+      </p>
+    </div>
+
+  </section>
+
+  <script id="ed-data" type="application/json" set:html={JSON.stringify(sources)}></script>
+  <script is:inline define:vars={{ repo: SITE.repo, branch: SITE.branch }}>
+    window.__HL = { repo, branch };
+  </script>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+  <script is:inline src="/editor.js"></script>
+</BaseLayout>

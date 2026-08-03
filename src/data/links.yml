@@ -1,0 +1,61 @@
+# ================================================================
+#  リンク台帳 (アキ管理)
+# ================================================================
+#  記事本文には生URLを書かない。必ず {{link:ID}} で参照する。
+#  ASPが変わっても、このファイルの1行を直せば全記事が直る。
+#
+#  status:
+#    active        通常稼働
+#    price_changed 価格が変わった（本文の記述要確認）
+#    discontinued  廃番
+#    asp_ended     ASP案件終了 → alternative へ差し替える
+#
+#  url が空の場合は「準備中」表示になる。
+#  ASP承認前でも記事を先に書けるようにするための仕組み。
+# ================================================================
+
+# ---- 通販ショップ（柱Cで使う） ----------------------------------
+shop_nls:
+  name: NLS
+  shop: 公式サイト
+  asp: 未定
+  url:                      # ASP承認後に入れる
+  price:
+  last_checked: 2026-08-03
+  status: active
+  alternative:
+  note: コンビニ受取に対応。柱Cの主力。
+
+shop_fanza_tsuhan:
+  name: FANZA通販
+  shop: 公式サイト
+  asp: FANZA(DMM)アフィリエイト
+  url:                      # ASP承認後に入れる
+  price:
+  last_checked: 2026-08-03
+  status: active
+  alternative:
+  note: サービス新規報酬が最も高い。API連携あり。
+
+shop_nobunaga:
+  name: 信長トイズ
+  shop: 公式サイト
+  asp: 未定
+  url:                      # ASP承認後に入れる
+  price:
+  last_checked: 2026-08-03
+  status: active
+  alternative:
+  note: 関西拠点の老舗。比較記事の3社目として使う。
+
+# ---- 商品（柱Bで使う。アキが随時追加） --------------------------
+# 例:
+# item_0001:
+#   name: 商品名
+#   shop: NLS
+#   asp: 未定
+#   url:
+#   price: 4980
+#   last_checked: 2026-08-03
+#   status: active
+#   alternative:
