@@ -144,7 +144,143 @@
   src.addEventListener('input', render);
   sel.addEventListener('change', function () { load(sel.value); });
 
-  /* ---------- 保存まわり ---------- */
+  /* ---------- GitHubトークン（このブラウザにだけ保存） ---------- */
+  var TK = 'honoka-gh-token';
+  var tokenInput = document.getElementById('ed-token');
+
+  function getToken() {
+    try { return localStorage.getItem(TK) || ''; } catch (e) { return ''; }
+  }
+  function refreshSetup() {
+    var has = !!getToken();
+    var d = document.getElementById('ed-setup');
+    d.dataset.ok = has ? '1' : '0';
+    d.querySelector('summary').textContent =
+      has ? '保存の設定（設定ずみ）' : '保存の設定（最初に一度だけ）';
+    if (!has) d.open = true;
+  }
+
+  document.getElementById('ed-token-save').addEventListener('click', function () {
+    var v = (tokenInput.value || '').trim();
+    if (!v) { say('トークンを貼り付けてください'); return; }
+    try { localStorage.setItem(TK, v); } catch (e) {}
+    tokenInput.value = '';
+    refreshSetup();
+    say('記録しました。これで保存できます');
+  });
+
+  document.getElementById('ed-token-clear').addEventListener('click', function () {
+    try { localStorage.removeItem(TK); } catch (e) {}
+    refreshSetup();
+    say('消しました');
+  });
+
+  refreshSetup();
+
+  /* ---------- GitHubへ直接保存 ---------- */
+  function b64(str) {
+    // 日本語を含むのでUTF-8にしてからbase64にする
+    var bytes = new TextEncoder().encode(str);
+    var bin = '';
+    for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+    return btoa(bin);
+  }
+
+  function apiPath() {
+    return 'src/pages/articles/' + current + '.md';
+  }
+
+  async function commit(message) {
+    var token = getToken();
+    if (!token) {
+      document.getElementById('ed-setup').open = true;
+      say('先に「保存の設定」を済ませてください');
+      return;
+    }
+    if (!current) { say('先に記事を選んでください'); return; }
+
+    var H = window.__HL;
+    var base = 'https://api.github.com/repos/' + H.repo + '/contents/' + apiPath();
+    var head = {
+      Authorization: 'Bearer ' + token,
+      Accept: 'application/vnd.github+json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    };
+
+    var btn = document.getElementById('ed-save');
+    var prevLabel = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = '保存中…';
+
+    try {
+      // いまのファイルのsha（更新には必須）
+      var g = await fetch(base + '?ref=' + H.branch, { headers: head });
+      if (g.status === 401) throw new Error('トークンが正しくないようです。発行し直して貼り直してください。');
+      if (g.status === 404) throw new Error('ファイルが見つかりません。リポジトリ名を確認してください。');
+      if (!g.ok) throw new Error('GitHubから応答がありません（' + g.status + '）');
+      var meta = await g.json();
+
+      var r = await fetch(base, {
+        method: 'PUT',
+        headers: Object.assign({ 'Content-Type': 'application/json' }, head),
+        body: JSON.stringify({
+          message: message,
+          content: b64(src.value),
+          sha: meta.sha,
+          branch: H.branch
+        })
+      });
+
+      if (r.status === 403) throw new Error('権限が足りません。トークンのContentsをRead and writeにしてください。');
+      if (r.status === 409) throw new Error('GitHub側が新しくなっています。ページを再読み込みしてからやり直してください。');
+      if (!r.ok) {
+        var e = await r.json().catch(function () { return {}; });
+        throw new Error(e.message || ('保存できませんでした（' + r.status + '）'));
+      }
+
+      SOURCES[current] = src.value;
+      say('保存しました。数分でサイトに反映されます');
+    } catch (err) {
+      alert('保存できませんでした。\n\n' + (err.message || err));
+      say('保存できませんでした');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = prevLabel;
+    }
+  }
+
+  function setDraft(on) {
+    var v = src.value;
+    var has = /^draft:\s*true\s*$/m.test(v);
+    if (on && !has) {
+      // frontmatterの最後（2つ目の---）の直前に入れる
+      v = v.replace(/^(---\n[\s\S]*?)(\n---)/, '$1\ndraft: true$2');
+    } else if (!on && has) {
+      v = v.replace(/^draft:\s*true\s*\n/m, '');
+    }
+    src.value = v;
+    render();
+  }
+
+  document.getElementById('ed-save').addEventListener('click', function () {
+    if (!current) { say('先に記事を選んでください'); return; }
+    if (/^draft:\s*true\s*$/m.test(src.value)) {
+      if (!confirm('この記事は下書きのままです。\n下書きを外して公開しますか？\n\n「キャンセル」を押すと、下書きのまま保存します。')) {
+        commit('記事を更新（下書き）: ' + current);
+        return;
+      }
+      setDraft(false);
+    }
+    commit('記事を更新: ' + current);
+  });
+
+  document.getElementById('ed-draft').addEventListener('click', function () {
+    if (!current) { say('先に記事を選んでください'); return; }
+    setDraft(true);
+    commit('下書きに戻す: ' + current);
+  });
+
+  /* ---------- 保存まわり（手動） ---------- */
   document.getElementById('ed-copy').addEventListener('click', function () {
     if (!current) { say('先に記事を選んでください'); return; }
     navigator.clipboard.writeText(src.value).then(

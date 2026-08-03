@@ -63,11 +63,43 @@ const slugs = Object.keys(sources).sort();
     </div>
 
     <div class="ed__foot">
-      <button type="button" id="ed-copy" class="btn">本文をコピー</button>
+      <button type="button" id="ed-save" class="btn">保存して公開する</button>
+      <button type="button" id="ed-draft" class="btn btn--ghost">下書きに戻す</button>
+      <button type="button" id="ed-copy" class="btn btn--ghost">本文をコピー</button>
       <button type="button" id="ed-dl" class="btn btn--ghost">.mdで保存</button>
       <a id="ed-gh" class="btn btn--ghost" href="#" target="_blank" rel="noopener">GitHubで開く</a>
       <span class="ed__msg" id="ed-msg"></span>
     </div>
+
+    <details class="ed__setup" id="ed-setup">
+      <summary>保存の設定（最初に一度だけ）</summary>
+      <div class="ed__setupBody">
+        <p>
+          「保存して公開する」を使うには、GitHubの<strong>アクセストークン</strong>が必要です。
+          このブラウザにだけ記録され、サイトには一切埋め込まれません。
+        </p>
+        <ol>
+          <li>
+            <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">
+              GitHubのトークン発行ページ</a>を開く
+          </li>
+          <li>Repository access で <strong>Only select repositories</strong> → <code>honoka-log</code> だけを選ぶ</li>
+          <li>Permissions → Repository permissions → <strong>Contents</strong> を <strong>Read and write</strong> にする</li>
+          <li>有効期限を決めて発行し、表示されたトークンを下に貼る</li>
+        </ol>
+        <div class="ed__tokenRow">
+          <input type="password" id="ed-token" placeholder="github_pat_… を貼り付け" autocomplete="off" />
+          <button type="button" id="ed-token-save" class="btn">記録する</button>
+          <button type="button" id="ed-token-clear" class="btn btn--ghost">消す</button>
+        </div>
+        <p class="ed__warn">
+          このトークンでできるのは <strong>honoka-log のファイル書き換えだけ</strong>です。
+          他のリポジトリやアカウント設定には触れません。
+          共用のパソコンでは「消す」を押してから離席してください。
+          万一のときは GitHub の設定画面からいつでも無効にできます。
+        </p>
+      </div>
+    </details>
 
     <div class="box box--memo" style="margin-top:2.4rem">
       <p class="box__title">保存のしかた</p>
