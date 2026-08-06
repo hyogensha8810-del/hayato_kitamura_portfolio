@@ -8,5 +8,8 @@
 
 const SITE_PHOTOS_AUTO = {
   gourmet: [],
-  sweets: []
+  sweets: [
+    { src: "photos/sweets/gourmet_hyogensha_-40.jpg", alt: "HAYATO KITAMURA 作品｜スイーツ写真 001" },
+    { src: "photos/sweets/gourmet_hyogensha_-41.jpg", alt: "HAYATO KITAMURA 作品｜スイーツ写真 002" }
+  ]
 };
