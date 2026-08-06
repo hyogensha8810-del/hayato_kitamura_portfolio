@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SHOP | HAYATO KITAMURA</title>
+<meta name="description" content="HAYATO KITAMURA の写真プリント・油絵風ポスターの販売。全国送料無料。">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,400&family=Noto+Serif+JP:wght@200;300;400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/style.css">
+<link rel="stylesheet" href="shop.css">
+</head>
+<body>
+
+<main class="shop-page shop-body">
+  <div class="shop-lead">
+    <h1 class="page-title">SHOP</h1>
+    <p class="page-title-jp">写真プリント・油絵風ポスター</p>
+    <p>撮りためた作品を、プリントとしてお届けします。<br>
+    すべてご注文をいただいてから1点ずつ印刷しております。</p>
+    <span class="freeship-tag">全国送料無料</span>
+  </div>
+
+  <div class="shop-filters">
+    <button class="on" data-f="all">すべて</button>
+    <button data-f="photo">写真プリント</button>
+    <button data-f="oil">油絵風ポスター</button>
+    <button data-f="framed">1点もの・額付き</button>
+  </div>
+
+  <div class="shop-masonry" id="shopGrid"></div>
+  <div id="shopEmpty"></div>
+</main>
+
+<script src="shop-data.js"></script>
+<script src="shop.js"></script>
+<script>shopInitList();</script>
+</body>
+</html>
