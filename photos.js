@@ -161,7 +161,6 @@ const SITE_PHOTOS = {
   galleryWide: [
     { src: "photos/gallery/_65A2451-1.jpg", alt: "HAYATO KITAMURA 作品｜グルメ・スイーツ写真 129" },
     { src: "photos/gallery/_V5A1543-1.jpg", alt: "HAYATO KITAMURA 作品｜グルメ・スイーツ写真 130" },
-    { src: "photos/gallery/A3-23.jpg", alt: "HAYATO KITAMURA 作品｜グルメ・スイーツ写真 131" },
     { src: "photos/gallery/_65A0032-1.jpg", alt: "HAYATO KITAMURA 作品｜グルメ・スイーツ写真 132" },
     { src: "photos/gallery/_V5A7772.JPG", alt: "HAYATO KITAMURA 作品｜グルメ・スイーツ写真 133" },
     { src: "photos/gallery/_V5A8728-1.jpg", alt: "HAYATO KITAMURA 作品｜グルメ・スイーツ写真 134" },

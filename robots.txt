@@ -1,9 +1,6 @@
 # hayatokitamura.com
-# SHOPは準備中のため、検索エンジンには載せない設定にしています。
-# 公開するときに Disallow の2行を削除してください。
 
 User-agent: *
-Disallow: /shop-preview-a7k2m9x3/
-Disallow: /photos/shop/
+Allow: /
 
 Sitemap: https://hayatokitamura.com/sitemap.xml
