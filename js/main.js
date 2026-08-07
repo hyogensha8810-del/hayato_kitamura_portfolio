@@ -67,6 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const autoGourmet = auto.gourmet || [];
 
     function render(tab) {
+      /* GOURMETタブだけ、ファイル名（01_〇〇, 02_〇〇…）の順に
+         左→右・上→下の行送りで並べる（入れた順が埋もれないように） */
+      masonryEl.classList.toggle('row-order', tab === 'gourmet');
       if (tab === 'gourmet') {
         buildGrid(masonryEl, autoGourmet);
         buildGrid(wideEl, []);
