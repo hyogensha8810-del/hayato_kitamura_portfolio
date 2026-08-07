@@ -34,11 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  /* ---- 写真グリッド ---- */
   function buildGrid(container, list) {
-    if (!container) return;
+    if (!container || !list) return;
     container.innerHTML = '';
-    if (!list || !list.length) return;
     list.forEach(p => {
       const fig = document.createElement('figure');
       fig.className = 'ph';
@@ -46,74 +44,59 @@ document.addEventListener('DOMContentLoaded', () => {
       img.src = p.src;
       img.alt = p.alt || '';
       img.loading = 'lazy';
-      img.addEventListener('load', () => {
-        // 写真そのものの縦横比をタイルに反映（縦・横・正方形がバラバラに並ぶ）
-        if (img.naturalWidth && img.naturalHeight) {
-          fig.style.setProperty('--ar', img.naturalWidth + ' / ' + img.naturalHeight);
-        }
-        img.classList.add('loaded');
-      });
+      img.addEventListener('load', () => img.classList.add('loaded'));
       fig.appendChild(img);
       fig.addEventListener('click', () => openLightbox(p.src, p.alt));
       container.appendChild(fig);
     });
   }
 
-  /* ---- Works のタブ切り替え（ALL / GOURMET / SWEETS）---- */
+  /* ---- ALL / GOURMET / SWEETS タブ ----
+     ・photos/gallery, photos/galleryWide ＝もともと入っていたスイーツ写真として SWEETS 扱い
+     ・photos/gourmet, photos/sweets フォルダへの新規アップロードは自動生成の SITE_PHOTOS_AUTO に入る
+  */
   if (typeof SITE_PHOTOS !== 'undefined') {
-    const auto = (typeof SITE_PHOTOS_AUTO !== 'undefined') ? SITE_PHOTOS_AUTO : {};
-    const gourmet = SITE_PHOTOS.gourmet || auto.gourmet || [];
-    const sweets  = SITE_PHOTOS.sweets  || auto.sweets  || [];
+    const auto = (typeof SITE_PHOTOS_AUTO !== 'undefined') ? SITE_PHOTOS_AUTO : { gourmet: [], sweets: [] };
+    const masonryEl = document.getElementById('masonry');
+    const wideEl = document.getElementById('masonryWide');
+    const tabsEl = document.getElementById('galleryTabs');
+
     const gallery = SITE_PHOTOS.gallery || [];
+    const galleryWide = SITE_PHOTOS.galleryWide || [];
+    const autoSweets = auto.sweets || [];
+    const autoGourmet = auto.gourmet || [];
 
-    const SETS = {
-      all:     [].concat(gourmet, sweets, gallery),
-      gourmet: gourmet,
-      sweets:  sweets
-    };
-
-    const masonry = document.getElementById('masonry');
-    const tabsBox = document.getElementById('galleryTabs');
-
-    if (masonry) {
-      // グルメ・スイーツのどちらにも写真が無いうちはタブを出さない
-      const useTabs = gourmet.length > 0 || sweets.length > 0;
-
-      const show = key => {
-        buildGrid(masonry, SETS[key] && SETS[key].length ? SETS[key] : SETS.all);
-        if (tabsBox) {
-          tabsBox.querySelectorAll('.gallery-tab').forEach(b => {
-            b.classList.toggle('active', b.dataset.cat === key);
-          });
-        }
-      };
-
-      if (useTabs && tabsBox) {
-        const defs = [
-          { cat: 'all',     en: 'ALL',     jp: 'すべて',   on: true },
-          { cat: 'gourmet', en: 'GOURMET', jp: 'グルメ',   on: gourmet.length > 0 },
-          { cat: 'sweets',  en: 'SWEETS',  jp: 'スイーツ', on: sweets.length > 0 }
-        ];
-        defs.filter(d => d.on).forEach(d => {
-          const b = document.createElement('button');
-          b.className = 'gallery-tab';
-          b.type = 'button';
-          b.dataset.cat = d.cat;
-          b.innerHTML = d.en + '<span class="tab-jp">' + d.jp + '</span>';
-          b.addEventListener('click', () => {
-            history.replaceState(null, '', d.cat === 'all' ? location.pathname : '#' + d.cat);
-            show(d.cat);
-          });
-          tabsBox.appendChild(b);
-        });
-        tabsBox.hidden = false;
+    function render(tab) {
+      if (tab === 'gourmet') {
+        buildGrid(masonryEl, autoGourmet);
+        buildGrid(wideEl, []);
+      } else if (tab === 'sweets') {
+        buildGrid(masonryEl, gallery.concat(autoSweets));
+        buildGrid(wideEl, galleryWide);
+      } else {
+        buildGrid(masonryEl, gallery.concat(autoSweets, autoGourmet));
+        buildGrid(wideEl, galleryWide);
       }
-
-      const fromHash = location.hash.replace('#', '');
-      show(SETS[fromHash] && SETS[fromHash].length ? fromHash : 'all');
     }
 
-    buildGrid(document.getElementById('masonryWide'), SITE_PHOTOS.galleryWide);
+    render('all');
+
+    if (tabsEl) {
+      tabsEl.hidden = false;
+      tabsEl.innerHTML = '';
+      [['all', 'ALL'], ['gourmet', 'GOURMET'], ['sweets', 'SWEETS']].forEach(([key, label]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = label;
+        btn.className = 'tab-btn' + (key === 'all' ? ' active' : '');
+        btn.addEventListener('click', () => {
+          [...tabsEl.children].forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          render(key);
+        });
+        tabsEl.appendChild(btn);
+      });
+    }
   }
 
   /* ライトボックス */
