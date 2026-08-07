@@ -209,6 +209,24 @@ a { color: inherit; text-decoration: none; }
 .masonry .ph img.loaded { opacity: 1; }
 .masonry .ph:hover img { transform: scale(1.04); }
 
+/* GOURMETタブ：ファイル名順（01_〇〇, 02_〇〇…）に
+   左→右・上→下の行送りで並べる（columnsの縦流しを解除） */
+.masonry.row-order {
+  columns: unset;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+.masonry.row-order .ph {
+  margin-bottom: 0;
+}
+@media (max-width: 1200px) {
+  .masonry.row-order { grid-template-columns: repeat(3, 1fr); }
+}
+@media (max-width: 900px) {
+  .masonry.row-order { grid-template-columns: repeat(2, 1fr); }
+}
+
 /* ---------- 横位置（landscape）写真だけの行 ---------- */
 .masonry-wide {
   display: grid;
